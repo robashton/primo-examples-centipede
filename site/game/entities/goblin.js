@@ -9,6 +9,9 @@ define(function(require) {
   }
 
   Goblin.prototype = {
+    tick: function() {
+
+    },
     render: function(context) {
       context.fillStyle = '#0F0'
       context.fillRect(this.x, this.y, this.width, this.height)
