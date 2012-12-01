@@ -6,6 +6,7 @@ define(function(require) {
   var level = {
     layers: [
        {
+        name: 'land',
         width: 30,
         height: 30,
         tileset: Underground,
