@@ -3,10 +3,31 @@ var send = require('send');
 var url = require('url');
 var path = require('path')
 var fs = require('fs')
-var express = require('express')()
+var app = require('express')()
+var _ = require('underscore')
 
-var app = http.createServer(express).listen(8080)
-express.use(function(req, res) {
+var server = http.createServer(app).listen(8080)
+
+
+app.get('/levels', function(req, res) {
+  fs.readdir('site/game/levels', function(err, files) {
+    var levels = _(files).map(function(file) {
+        return { name: file, link: '../game/levels/' + file.split('.')[0] }
+    })
+    res.send(levels)
+  })
+})
+
+app.get('/entities', function(req, res) {
+  fs.readdir('site/game/entities', function(err, files) {
+    var levels = _(files).map(function(file) {
+        return { name: file, link: '../game/entities/' + file.split('.')[0] }
+    })
+    res.send(levels)
+  })
+})
+
+app.use(function(req, res) {
   function error(err) {
     res.statusCode = err.status || 500;
     res.end(err.message);
@@ -22,4 +43,5 @@ express.use(function(req, res) {
     .on('directory', redirect)
     .pipe(res);
 })
-app.listen(8080);
+
+server.listen(8080);
