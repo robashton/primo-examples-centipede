@@ -1,8 +1,29 @@
 <html>
   <head>
-    <script type="text/javascript" src="/lib/require.js" data-main="/editor"></script>
+    <link rel="stylesheet" type="text/css" href="/lib/bootstrap/css/bootstrap.min.css">
   </head>
   <body>
-    <canvas id="target" width="640" height="480"></canvas>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="brand" href="#">Engine Editor</a>
+          <div class="nav-collapse collapse">
+            <ul class="nav">
+              <li class="dropdown">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">Level<span class="caret"></span></a>
+                <ul class="dropdown-menu" id="list-of-levels">
+                  <li><a href="#" id="btn-create-level">New level</a></li>
+                  <li class="divider"></li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+      <canvas id="target" width="640" height="480"></canvas>
+    </div>
+    <script type="text/javascript" src="/lib/require.js" data-main="/editor"></script>
   </body>
 </html>
