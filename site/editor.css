@@ -7,6 +7,21 @@ canvas {
   background-color: #000;
 }
 
-
 .tools {
+
+}
+
+
+.layer {
+  height: 30px;
+  cursor: pointer;
+  background-color: #FFF;
+}
+
+.layer:hover {
+  background-color: #FF0;
+}
+
+.layer.selected {
+  background-color: #FF0;
 }
