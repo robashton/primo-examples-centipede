@@ -47,3 +47,7 @@ canvas {
 #palette-selection > div:hover {
   border: 2px solid #FF0;
 }
+
+#palette-selection > div.selected {
+  border: 2px solid #FF0;
+}

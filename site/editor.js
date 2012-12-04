@@ -3,6 +3,7 @@ require.config({
       underscore: 'lib/underscore-min',
       eventable: 'lib/eventable',
       eventcontainer: 'lib/eventcontainer',
+      hammer: 'lib/hammer',
       jquery: 'lib/jquery',
       'bootstrap': 'lib/bootstrap/js/bootstrap'
     }
