@@ -2,14 +2,13 @@ define(function(require) {
   var Goblin = require('../entities/goblin')
   var Underground = require('../tilesets/underground')
 
-
   var level = {
+    width: 30,
+    height: 30,
+    tilesize: 32,
     layers: [
        {
         name: 'land',
-        width: 30,
-        height: 30,
-        tilesize: 32,
         tileset: Underground,
         data: [
           0,2,2,1,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,
