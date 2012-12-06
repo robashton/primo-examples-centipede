@@ -9,7 +9,7 @@ define(function(require) {
         name: 'land',
         width: 30,
         height: 30,
-        tilesize: 16,
+        tilesize: 32,
         tileset: Underground,
         data: [
           0,2,2,1,0,1,0,0,1,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,
