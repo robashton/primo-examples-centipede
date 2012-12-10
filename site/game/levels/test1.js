@@ -1,6 +1,10 @@
-define(function(require) {
-  var Goblin = require('../entities/goblin')
-  var Underground = require('../tilesets/underground')
+define([
+    '../entities/goblin',
+    '../tilesets/underground'
+  ], function(
+    Goblin,
+    Underground
+  ){
 
   var level = {
     width: 30,
