@@ -12,7 +12,7 @@ var server = http.createServer(app).listen(8080)
 app.get('/levels', function(req, res) {
   fs.readdir('site/game/levels', function(err, files) {
     var levels = _(files).map(function(file) {
-        return { name: file, link: '../game/levels/' + file.split('.')[0] }
+        return { name: file, link: '../game/levels/' + file }
     })
     res.send(levels)
   })
