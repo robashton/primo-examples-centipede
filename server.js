@@ -7,14 +7,15 @@ var app = require('express')()
 var _ = require('underscore')
 
 var server = http.createServer(app).listen(8080)
+app.use(require('express').bodyParser())
 
-app.post('/game/levels/:file', function(req, res) {
-   fs.writeFile('site/game/levels/' + req.params.file, req.body, 'utf8', function(err) {
+app.put('/game/levels/:file', function(req, res) {
+   fs.writeFile('site/game/levels/' + req.params.file, JSON.stringify(req.body), 'utf8', function(err) {
      if(err) {
        res.statusCode = 500
-       res.end(err)
+       res.end('' + err)
      } else {
-       res.end('success', 200)
+       res.end('success')
      }
    })
 })
