@@ -8,6 +8,16 @@ var _ = require('underscore')
 
 var server = http.createServer(app).listen(8080)
 
+app.post('/game/levels/:file', function(req, res) {
+   fs.writeFile('site/game/levels/' + req.params.file, req.body, 'utf8', function(err) {
+     if(err) {
+       res.statusCode = 500
+       res.end(err)
+     } else {
+       res.end('success', 200)
+     }
+   })
+})
 
 app.get('/levels', function(req, res) {
   fs.readdir('site/game/levels', function(err, files) {
