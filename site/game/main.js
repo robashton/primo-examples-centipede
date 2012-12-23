@@ -3,7 +3,7 @@ define(function(require) {
 
   var runner = new Runner('target')
   runner.on('init', function() {
-    this.loadLevel('/game/levels/test1.json')
+    this.loadLevel('/game/levels/test.json')
   })
   runner.start()
 })
