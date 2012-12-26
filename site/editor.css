@@ -11,7 +11,6 @@ canvas {
 
 }
 
-
 .layer {
   height: 30px;
   cursor: pointer;
@@ -49,5 +48,20 @@ canvas {
 }
 
 #palette-selection > div.selected {
+  border: 2px solid #FF0;
+}
+
+#entity-selection > img {
+  float: left;
+  margin-top: 5px;
+  margin-left: 5px;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+#entity-selection > img:hover {
+  border: 2px solid #FF0;
+}
+#entity-selection > img.selected {
   border: 2px solid #FF0;
 }
