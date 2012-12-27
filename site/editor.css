@@ -12,7 +12,6 @@ canvas {
 }
 
 .layer {
-  height: 30px;
   cursor: pointer;
   background-color: #FFF;
 }
@@ -23,6 +22,19 @@ canvas {
 
 .layer.selected {
   background-color: #FF0;
+}
+
+.layer > .controls { 
+  display: none;
+}
+
+.layer.selected > .controls { 
+  display: block;
+  height: 30px;
+}
+
+.layer.selected > .controls > * {
+  float: left;
 }
 
 #palette-selection {
