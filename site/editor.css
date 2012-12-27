@@ -42,6 +42,10 @@ canvas {
   border: 2px solid transparent;
 }
 
+#palette {
+  height: 120px;
+  overflow: hidden;
+}
 
 #palette-selection > div:hover {
   border: 2px solid #FF0;

@@ -27,20 +27,24 @@
     <div class="container-fluid" style="margin-top: 50px">
       <div class="row-fluid">
         <div class="span2 tools">
-          <h4>Layers <a href="#" id="btn-add-layer">(add)</a></h4>
-          <ul id="layer-selection"></ul>
-          <h4>Palette</h4>
-          <div id="palette-selection"></div>
+          <div id="layers">
+            <h4>Layers <a href="#" id="btn-add-layer">(add)</a></h4>
+            <ul id="layer-selection"></ul>
+          </div>
+          <div id="palette">
+            <h4>Palette</h4>
+            <div id="palette-selection"></div>
+          </div>
+          <div id="entities">
+            <h4>Entities</h4>
+            <div id="entity-selection">
+
+            </div>
+          </div>
         </div>
         <div class="span7">
           <h5 class="level-title">No level loaded</h5>
           <canvas id="target" width="800" height="600"></canvas>
-        </div>
-        <div class="span2 entities">
-          <h4>Entities</h4>
-          <div id="entity-selection">
-
-          </div>
         </div>
       </div>
     </div>
