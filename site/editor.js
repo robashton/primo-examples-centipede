@@ -4,6 +4,7 @@ require.config({
       eventable: 'lib/eventable',
       eventcontainer: 'lib/eventcontainer',
       hammer: 'lib/hammer',
+      commons: 'engine/commons',
       jquery: 'lib/jquery',
       'bootstrap': 'lib/bootstrap/js/bootstrap'
     }

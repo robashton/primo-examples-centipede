@@ -1,22 +1,12 @@
 define(function(require) {
+  var Entity = require('../../engine/entity')
+  var ColouredQuad = require('../components/colouredquad')
 
-  var Goblin = function(id, data) {
-    this.id = id
-    this.x = data.x
-    this.y = data.y
+  var Goblin = Entity.Define(function(id, data) {
+    this.attach(new ColouredQuad(this, '#0F0'))
     this.width = 10
     this.height = 10
-  }
-
-  Goblin.prototype = {
-    tick: function() {
-
-    },
-    render: function(context) {
-      context.fillStyle = '#0F0'
-      context.fillRect(this.x, this.y, this.width, this.height)
-    }
-  }
+  })
 
   return Goblin
 
