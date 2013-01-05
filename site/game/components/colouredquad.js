@@ -8,7 +8,7 @@ define(function(require) {
 
   ColouredQuad.prototype = {
     render: function(context) {
-      context.fillStyle = '#0F0'
+      context.fillStyle = this.colour
       context.fillRect(this.entity.x, this.entity.y, this.entity.width, this.entity.height)
     }
   }
