@@ -6,6 +6,7 @@ define(function(require) {
     this.attach(new ColouredQuad(this, '#0F0'))
     this.width = 10
     this.height = 10
+    this.vely = 2.0
   })
 
   return Goblin
