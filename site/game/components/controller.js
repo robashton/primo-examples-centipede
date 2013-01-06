@@ -12,16 +12,16 @@ define(function(require) {
   Controller.prototype = {
     tick: function() {
       if(this.input.active('left')) {
-        this.entity.velx = -20
+        this.entity.velx = -2
       }
       if(this.input.active('right')) {
-        this.entity.velx = 20
+        this.entity.velx = 2
       }
       if(this.input.active('up')) {
-        this.entity.vely = -20
+        this.entity.vely = -2
       }
       if(this.input.active('down')) {
-        this.entity.vely = 20
+        this.entity.vely = 2
       }
     }
   }
