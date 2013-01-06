@@ -9,8 +9,9 @@ define(function(require) {
   EventContainer.prototype = {
     raise: function(source, data) {
      var handlerLength = this.handlers.length;
+     var handlers = this.handlers
      for(var i = 0; i < handlerLength; i++) {
-        var handler = this.handlers[i];
+        var handler = handlers[i];
         handler.method.call(handler.context || this.defaultContext, data, source);   
      }
     },

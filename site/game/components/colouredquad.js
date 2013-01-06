@@ -1,5 +1,5 @@
 define(function(require) {
-  var util = require('../../engine/commons')
+  var util = require('engine/commons')
 
   var ColouredQuad = function(entity, colour) {
     this.entity = entity

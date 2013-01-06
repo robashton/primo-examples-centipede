@@ -1,5 +1,5 @@
 define(function(require) {
-  var Entity = require('../../engine/entity')
+  var Entity = require('engine/entity')
   var ColouredQuad = require('../components/colouredquad')
 
   var Goblin = Entity.Define(function(id, data) {
