@@ -1,6 +1,6 @@
 define(function(require) {
   var Entity = require('engine/entity')
-  var Animation = require('game/components/animation')
+  var Animation = require('engine/components/animation')
   var Controller = require('game/components/controller')
 
   var Player = Entity.Define(function(id, data) {

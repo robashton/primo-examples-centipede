@@ -7,5 +7,5 @@ require.config({
       jquery: 'lib/jquery'
     }
 });
-require(['game/main'], function() { })
+require(['tests/collisionperformance'], function() { })
 
