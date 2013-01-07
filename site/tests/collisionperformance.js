@@ -37,7 +37,7 @@ define(function(require) {
 
   console.time('test')
   for(i = 0; i < iterations; i++) {
-    var world = new CollisionMap(width, height, cellsize)
+    var world = new CollisionMap(cellsize)
     for(j = 0; j < entities.length; j++) {
       var entity = entities[j]
       entity.x += entity.velx
