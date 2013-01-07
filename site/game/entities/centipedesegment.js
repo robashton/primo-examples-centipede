@@ -12,7 +12,7 @@ define(function(require) {
   Trailer.prototype = {
     tick: function() {
       this.calculatePosition()
-   // this.currentAnim = this.anims['walk' + this.direction]
+      this.dispatch('set-animation', 'walk' + this.direction)
     },
     calculatePosition: function() {
       var position = this.head.getPositionForSegment(this.index)
@@ -25,22 +25,16 @@ define(function(require) {
   return Entity.Define(function(id, data) {
     this.width = 8
     this.height = 8
-    this.attach(new Animation(this, 'media/centipede.png', 8, 8, 0.1, [12,13]))
     this.attach(new Trailer(this, data.head, data.index))
+    this.attach(new Animation(this, 'media/centipede.png', 8, 8, 0.1, [12,13]))
+      .define( 'walkleft', 0.1, [12,13])
+      .define( 'walkright', 0.1, [12,13])
+      .define( 'walkdown', 0.1, [10,11])
+      .define( 'walkup', 0.1, [10,11])
   })
 })
 
 /*
-  init: function( x, y, settings ) {
-      this.parent( x, y, settings );
-      this.addAnim( 'walkleft', 0.1, [12,13]);
-      this.addAnim( 'walkright', 0.1, [12,13]);
-      this.addAnim( 'walkdown', 0.1, [10,11]);
-      this.addAnim( 'walkup', 0.1, [10,11]);
-      this.head = settings.head
-      this.index = settings.index
-      this.calculatePosition()
-    },
     check: function(other) {
       this.parent(other)
       if(other instanceof EntityBullet) {

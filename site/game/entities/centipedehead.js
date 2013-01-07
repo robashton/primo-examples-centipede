@@ -13,12 +13,34 @@ define(function(require) {
     this.direction = ''
     this.addInitialSegments()
     this.moveRight()
+    this.input = this.entity.game.input
   }
 
   Head.prototype = {
     tick: function() {
       this.updateHistory()
       this.checkBounds()
+      if(this.input.active('left'))
+        this.moveLeft()
+      if(this.input.active('right'))
+        this.moveRight()
+      if(this.input.active('up'))
+        this.moveUp()
+      if(this.input.active('down'))
+        this.moveDown()
+    },
+    updateHistory: function() {
+      this.history[this.history.length-1].endx = this.entity.x
+      this.history[this.history.length-1].endy = this.entity.y
+    },
+    pushHistory: function() {
+      this.history.push({
+        x: this.entity.x,
+        y: this.entity.y,
+        endx: this.entity.x,
+        endy: this.entity.y,
+        direction: this.direction
+      })
     },
     addInitialSegments: function() {
       for(var i =0 ; i < 5; i++) {
@@ -42,16 +64,16 @@ define(function(require) {
       this.direction = direction
       this.entity.velx = x
       this.entity.vely = y
-      // this.currentAnim = this.anims['walk' + this.direction]
       this.pushHistory()
+      this.dispatch('set-animation', 'walk' + this.direction)
     },
     damage: function() {
       if(this.segments.length === 0) {
-        this.entity.raise('player-died')
+        this.raise('player-died')
         //this.kill()
         return
       }
-      this.entity.raise('player-damaged')
+      this.raise('player-damaged')
       var segment = this.segments.pop()
       // segment.kill()
     },
@@ -104,39 +126,22 @@ define(function(require) {
       if(this.y > 200)
         this.moveUp()
     },
-    updateHistory: function() {
-      this.history[this.history.length-1].endx = this.x
-      this.history[this.history.length-1].endy = this.y
-    },
-    pushHistory: function() {
-      this.history.push({
-        x: this.x,
-        y: this.y,
-        endx: this.x,
-        endy: this.y,
-        direction: this.direction
-      })
-    }
   }
 
   return Entity.Define(function(id, data) {
     this.width = 8
     this.height = 8
-    this.attach(new Animation(this, 'media/centipede.png', 8, 8, 10, [0,1]))
     this.attach(new Head(this))
+    this.attach(new Animation(this, 'media/centipede.png', 8, 8))
+      .define( 'walkleft', 0.1, [0, 1], { flipx: true})
+      .define( 'walkright', 0.1, [0, 1])
+      .define( 'walkdown', 0.1, [2, 3])
+      .define( 'walkup', 0.1, [2,3], { flipy: true})
   })
 
 })
 
   /*
-      this.addAnim( 'walkleft', 0.1, [0, 1]);
-      this.addAnim( 'walkright', 0.1, [0, 1]);
-      this.addAnim( 'walkdown', 0.1, [2, 3]);
-      this.addAnim( 'walkup', 0.1, [2,3], true);
-      this.anims.walkleft.flip.x = true
-      this.anims.walkup.flip.y = true
-    },
-    },
     check: function(other) {
       this.parent(other)
       if(other instanceof EntityBullet) {

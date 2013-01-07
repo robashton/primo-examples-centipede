@@ -13,6 +13,10 @@ define(function(require) {
     this.width = 320
     this.height = 240
     this.game.camera.setViewport(0, 0, this.width,this.height)
+    this.game.input.bind(this.game.input.LEFT_ARROW, "left")
+    this.game.input.bind(this.game.input.RIGHT_ARROW, "right")
+    this.game.input.bind(this.game.input.DOWN_ARROW, "down")
+    this.game.input.bind(this.game.input.UP_ARROW, "up")
   }
   CentipedeGame.prototype = {
     restart: function() {
