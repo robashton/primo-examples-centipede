@@ -11,7 +11,7 @@ define(function(require) {
     this.game.on('flower-eaten', this.onFlowerEaten, this)
     this.width = 320
     this.height = 240
-    this.game.camera.createViewport(0, 0, this.width,this.height)
+    this.game.camera.setViewport(0, 0, this.width,this.height)
   }
   CentipedeGame.prototype = {
     restart: function() {
@@ -63,4 +63,5 @@ define(function(require) {
         world: this.world
       })
       */
+   return CentipedeGame
 })
