@@ -1,21 +1,37 @@
-ig.module(
-	'game.entities.centipedesegment'
-)
-.requires(
-  'impact.entity',
-  'game.entities.bullet',
-  'game.entities.deadsegment',
-  'game.entities.rock'
-)
-.defines(function(){
+define(function(require) {
+  var Entity = require('engine/entity')
+  var Animation = require('engine/components/animation')
 
-  EntityCentipedeSegment = ig.Entity.extend({
-    size: {x: 8, y: 8},
-    collides: ig.Entity.COLLIDES.LITE,
-    checkAgainst: ig.Entity.TYPE.B,
-    type: ig.Entity.TYPE.A,
-    animSheet: new ig.AnimationSheet('media/centipede.png', 8, 8),
-    init: function( x, y, settings ) {
+  var Trailer = function(entity, head, index) {
+    this.entity = entity
+    this.head = head
+    this.index = index
+    this.direction = ''
+  }
+
+  Trailer.prototype = {
+    tick: function() {
+      this.calculatePosition()
+   // this.currentAnim = this.anims['walk' + this.direction]
+    },
+    calculatePosition: function() {
+      var position = this.head.getPositionForSegment(this.index)
+      this.entity.x = position.x
+      this.entity.y = position.y
+      this.direction = position.direction
+    },
+  }
+
+  return Entity.Define(function(id, data) {
+    this.width = 8
+    this.height = 8
+    this.attach(new Animation(this, 'media/centipede.png', 8, 8, 0.1, [12,13]))
+    this.attach(new Trailer(this, data.head, data.index))
+  })
+})
+
+/*
+  init: function( x, y, settings ) {
       this.parent( x, y, settings );
       this.addAnim( 'walkleft', 0.1, [12,13]);
       this.addAnim( 'walkright', 0.1, [12,13]);
@@ -24,17 +40,6 @@ ig.module(
       this.head = settings.head
       this.index = settings.index
       this.calculatePosition()
-    },
-    calculatePosition: function() {
-      var position = this.head.getPositionForSegment(this.index)
-      this.pos.x = position.x
-      this.pos.y = position.y
-      this.direction = position.direction
-    },
-    update: function() {
-      this.parent()
-      this.calculatePosition()
-      this.currentAnim = this.anims['walk' + this.direction]
     },
     check: function(other) {
       this.parent(other)
@@ -52,6 +57,4 @@ ig.module(
             ig.game.spawnEntity( EntityRock, self.pos.x, self.pos.y )
         }, 1000)
     }
-  })
-
-})
+  */

@@ -1,35 +1,24 @@
-ig.module(
-	'game.entities.centipedehead'
-)
-.requires(
-  'impact.entity',
-  'game.entities.centipedesegment',
-  'game.entities.bullet'
-)
-.defines(function(){
+define(function(require) {
+  var Entity = require('engine/entity')
+  var Animation = require('engine/components/animation')
+  var CentipedeSegment = require('./centipedesegment')
 
-  EntityCentipedeHead = ig.Entity.extend({
-    size: {x: 8, y: 8},
-    maxSegments: 20,
-    segments: [],
-    history: [],
-    speed: 60,
-    direction: '',
-    collides: ig.Entity.COLLIDES.LITE,
-    checkAgainst: ig.Entity.TYPE.B,
-    type: ig.Entity.TYPE.A,
-    animSheet: new ig.AnimationSheet('media/centipede.png', 8, 8),
-    init: function( x, y, settings ) {
-      this.parent( x, y, settings );
-      this.addAnim( 'walkleft', 0.1, [0, 1]);
-      this.addAnim( 'walkright', 0.1, [0, 1]);
-      this.addAnim( 'walkdown', 0.1, [2, 3]);
-      this.addAnim( 'walkup', 0.1, [2,3], true);
+  var Head = function(entity) {
+    this.entity = entity
+    this.game = entity.game
+    this.maxSegments = 20
+    this.segments = []
+    this.history = []
+    this.speed = 2,
+    this.direction = ''
+    this.addInitialSegments()
+    this.moveRight()
+  }
 
-      this.anims.walkleft.flip.x = true
-      this.anims.walkup.flip.y = true
-      this.moveRight()
-      this.addInitialSegments()
+  Head.prototype = {
+    tick: function() {
+      this.updateHistory()
+      this.checkBounds()
     },
     addInitialSegments: function() {
       for(var i =0 ; i < 5; i++) {
@@ -51,38 +40,30 @@ ig.module(
     changeDirection: function(direction, x, y) {
       if(this.direction === direction) return
       this.direction = direction
-      this.vel.x = x
-      this.vel.y = y
-      this.currentAnim = this.anims['walk' + this.direction]
+      this.entity.velx = x
+      this.entity.vely = y
+      // this.currentAnim = this.anims['walk' + this.direction]
       this.pushHistory()
     },
-    update: function() {
-      this.updateHistory()
-      this.checkBounds()
-      this.parent()
+    damage: function() {
+      if(this.segments.length === 0) {
+        this.entity.raise('player-died')
+        //this.kill()
+        return
+      }
+      this.entity.raise('player-damaged')
+      var segment = this.segments.pop()
+      // segment.kill()
     },
-    checkBounds: function() {
-      if(this.pos.x < 0)
-        this.moveRight()
-      if(this.pos.x > 312)
-        this.moveLeft()
-      if(this.pos.y < 0)
-        this.moveDown()
-      if(this.pos.y > 200)
-        this.moveUp()
-    },
-    updateHistory: function() {
-      this.history[this.history.length-1].endx = this.pos.x
-      this.history[this.history.length-1].endy = this.pos.y
-    },
-    pushHistory: function() {
-      this.history.push({
-        x: this.pos.x,
-        y: this.pos.y,
-        endx: this.pos.x,
-        endy: this.pos.y,
-        direction: this.direction
+    grow: function() {
+      if(this.segments.length === this.maxSegments) return
+      var segment = this.entity.game.spawnEntity(CentipedeSegment, {
+        x: this.entity.x,
+        y: this.entity.y,
+        head: this,
+        index: this.segments.length+1
       })
+      this.segments.push(segment)
     },
     getPositionForSegment: function(index) {
       var distanceFromHead = index * 8
@@ -113,6 +94,49 @@ ig.module(
           return this.tryGetPositionFromHistory(index-1, desired, total)
       }
     },
+    checkBounds: function() {
+      if(this.x < 0)
+        this.moveRight()
+      if(this.x > 312)
+        this.moveLeft()
+      if(this.y < 0)
+        this.moveDown()
+      if(this.y > 200)
+        this.moveUp()
+    },
+    updateHistory: function() {
+      this.history[this.history.length-1].endx = this.x
+      this.history[this.history.length-1].endy = this.y
+    },
+    pushHistory: function() {
+      this.history.push({
+        x: this.x,
+        y: this.y,
+        endx: this.x,
+        endy: this.y,
+        direction: this.direction
+      })
+    }
+  }
+
+  return Entity.Define(function(id, data) {
+    this.width = 8
+    this.height = 8
+    this.attach(new Animation(this, 'media/centipede.png', 8, 8, 10, [0,1]))
+    this.attach(new Head(this))
+  })
+
+})
+
+  /*
+      this.addAnim( 'walkleft', 0.1, [0, 1]);
+      this.addAnim( 'walkright', 0.1, [0, 1]);
+      this.addAnim( 'walkdown', 0.1, [2, 3]);
+      this.addAnim( 'walkup', 0.1, [2,3], true);
+      this.anims.walkleft.flip.x = true
+      this.anims.walkup.flip.y = true
+    },
+    },
     check: function(other) {
       this.parent(other)
       if(other instanceof EntityBullet) {
@@ -125,23 +149,4 @@ ig.module(
       for(var i = 0; i < this.segments.length; i++)
         this.segments[i].kill()
     },
-    damage: function() {
-      if(this.segments.length === 0) {
-        Events.raise('player-died')
-        this.kill()
-        return
-      }
-      Events.raise('player-damaged')
-      var segment = this.segments.pop()
-      segment.kill()
-    },
-    grow: function() {
-      if(this.segments.length === this.maxSegments) return
-      var segment = ig.game.spawnEntity(EntityCentipedeSegment, 0, 0, {
-          head: this,
-          index: this.segments.length+1
-        })
-        this.segments.push(segment)
-    }
-  });
-});
+  */
