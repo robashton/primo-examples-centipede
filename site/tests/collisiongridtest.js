@@ -7,7 +7,7 @@ define(function(require) {
     , cellsize = 32
     , collisioncount = 0
     , lastid = 0
-    , entityCount = 100
+    , entityCount = 200
     , iterations = 1
 
   function createEntity() {
