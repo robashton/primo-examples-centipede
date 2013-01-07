@@ -1,8 +1,108 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <script type="text/javascript" src="/lib/require.js" data-main="/config"></script>
-  </head>
-  <body>
-    <canvas id="target" width="640" height="480"></canvas> 
-  </body>
+<head>
+	<title>Centipede 2013</title>
+  <link rel="stylesheet" href="/lib/bootstrap/css/bootstrap.min.css"></script>
+	<style type="text/css">
+
+		html,body {
+			background-color: #333;
+			color: #fff;
+			font-family: helvetica, arial, sans-serif;
+			margin: 0;
+			padding: 0;
+			font-size: 12pt;
+		}
+
+    #game {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+		
+		#canvas {
+			position: absolute;
+			left: 0;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			margin: auto;
+		}
+	</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+</head>
+<body>
+  <div id="start">
+    <div class="container">
+      <h1>Centipede 2013</h1>
+      <h3>Exposition</h3>
+      <p>You are the villain, a pesky centipede found in the garden!</p>
+
+      <div class="centipede">
+        <div class="head"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+        <div class="segment"></div>
+      </div>
+
+      <p>A villain you say? Why's that you say? Eating the flowers I say!</p>
+
+      <div class="flowers">
+        <div class="one"></div>
+        <div class="two"></div>
+        <div class="three"</div>
+        <div class="four"></div>
+        <div class="five"></div>
+      </div>
+
+      <p>Thankfully the garden is protected by a noble defender who has his own agenda of destruction</p>
+
+      <div class="defender"></div>
+
+      <p>Avoid the bullets, collect the flowers - and be fast, or you'll be left with no stone left to hide behind</p>
+
+      <h3>Controls</h3>
+      <p>Arrow keys if you're on a PC</p>
+      <p>Swipe in a direction if you're on a mobile device</p>
+
+      <p>If you're having difficulty loading the game, then click <a href="/?disablesounds=true">this link</a> or append ?disablesounds=true to the end of the url</p>
+
+      <button class="btn btn-large btn-primary" id="start" type="button">Start</button> 
+      </div>
+    </div>
+  </div>
+  <div id="game" style="display:none">
+    <canvas id="canvas"></canvas>
+  </div>
+  <div id="gameover" style="display:none">
+    <div class="container">
+      <h1>Dead centipede is dead</h1>
+      <h4>Here are some glorious stats from your villainy</h4>
+      <dl class="dl-horizontal">
+        <dt>Score</dt><dd id="final-score"></dd>
+        <dt>Flowers eaten</dt><dd id="total-flowers"></dd>
+        <dt>Rocks destroyed</dt><dd id="total-rocks"></dd>
+        <dt>Longest streak</dt><dd id="longest-streak"></dd>
+      </dl>
+      <button class="btn btn-large btn-primary" id="restart-button" type="button">Try again</button> 
+    </div>
+  </div>
+  <script type="text/javascript" src="/lib/jquery.js"></script>
+  <script type="text/javascript" src="/lib/bootstrap/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="/lib/touchwipe.js"></script>
+  <script type="text/javascript" src="/lib/require.js" data-main="/config"></script>
+  <script type="text/javascript">
+      var _gaq = _gaq || [];
+        _gaq.push(['_setAccount', 'UA-11207442-13']);
+          _gaq.push(['_trackPageview']);
+
+            (function() {
+                var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                          })();
+  </script>
+</body>
 </html>

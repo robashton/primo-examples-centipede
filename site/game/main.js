@@ -1,5 +1,4 @@
 define(function(require) {
-  var $ = require('jquery')
   var Runner = require('engine/core')
   var CentipedeGame = require('./centipedegame')
 

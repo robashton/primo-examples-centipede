@@ -3,8 +3,7 @@ require.config({
     paths: {
       underscore: 'lib/underscore-min',
       eventable: 'lib/eventable',
-      eventcontainer: 'lib/eventcontainer',
-      jquery: 'lib/jquery'
+      eventcontainer: 'lib/eventcontainer'
     }
 });
 require(['game/main'], function() { })
