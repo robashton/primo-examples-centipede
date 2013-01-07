@@ -12,7 +12,7 @@ define(function(require) {
   Trailer.prototype = {
     tick: function() {
       this.calculatePosition()
-      this.dispatch('set-animation', 'walk' + this.direction)
+      this.entity.dispatch('set-animation', 'walk' + this.direction)
     },
     calculatePosition: function() {
       var position = this.head.getPositionForSegment(this.index)

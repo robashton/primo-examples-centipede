@@ -65,7 +65,7 @@ define(function(require) {
       this.entity.velx = x
       this.entity.vely = y
       this.pushHistory()
-      this.dispatch('set-animation', 'walk' + this.direction)
+      this.entity.dispatch('set-animation', 'walk' + this.direction)
     },
     damage: function() {
       if(this.segments.length === 0) {
