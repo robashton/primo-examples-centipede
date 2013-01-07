@@ -6,7 +6,10 @@ define(function(require) {
     this.width = 12
     this.height = 12
     this.rockType = 0
-    this.attach(new Animation(this, 'media/rock.png', 12, 12, 5, [ 0 ]))
+    this.attach(new Animation(this, 'media/rock.png', 12, 12))
+      .define( 'idle', 10, [0])
+      .define( 'idle1', 10, [1])
+      .define( 'idle2', 10, [2])
 
     /*
     init: function( x, y, settings ) {

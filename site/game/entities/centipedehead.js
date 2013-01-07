@@ -131,14 +131,13 @@ define(function(require) {
   return Entity.Define(function(id, data) {
     this.width = 8
     this.height = 8
-    this.attach(new Head(this))
     this.attach(new Animation(this, 'media/centipede.png', 8, 8))
-      .define( 'walkleft', 0.1, [0, 1], { flipx: true})
-      .define( 'walkright', 0.1, [0, 1])
-      .define( 'walkdown', 0.1, [2, 3])
-      .define( 'walkup', 0.1, [2,3], { flipy: true})
+      .define( 'walkleft', 10, [0, 1], { flipx: true})
+      .define( 'walkright', 10, [0, 1])
+      .define( 'walkdown', 10, [2, 3])
+      .define( 'walkup', 10, [2,3], { flipy: true})
+    this.attach(new Head(this))
   })
-
 })
 
   /*

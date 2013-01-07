@@ -27,10 +27,10 @@ define(function(require) {
     this.height = 8
     this.attach(new Trailer(this, data.head, data.index))
     this.attach(new Animation(this, 'media/centipede.png', 8, 8, 0.1, [12,13]))
-      .define( 'walkleft', 0.1, [12,13])
-      .define( 'walkright', 0.1, [12,13])
-      .define( 'walkdown', 0.1, [10,11])
-      .define( 'walkup', 0.1, [10,11])
+      .define( 'walkleft', 10, [12,13])
+      .define( 'walkright', 10, [12,13])
+      .define( 'walkdown', 10, [10,11])
+      .define( 'walkup', 10, [10,11])
   })
 })
 
