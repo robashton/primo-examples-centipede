@@ -27,7 +27,7 @@ define(function(require) {
     this.width = 8
     this.height = 8
     this.attach(new Trailer(this, data.head, data.index))
-    this.attach(new RigidBody(this))
+    this.attach(new RigidBody(this, { group: 'centipede'  }))
     this.attach(new Animation(this, 'media/centipede.png', 8, 8, 0.1, [12,13]))
       .define( 'walkleft', 10, [12,13])
       .define( 'walkright', 10, [12,13])
