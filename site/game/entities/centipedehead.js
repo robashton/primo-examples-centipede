@@ -1,6 +1,7 @@
 define(function(require) {
   var Entity = require('engine/entity')
   var Animation = require('engine/components/animation')
+  var RigidBody = require('engine/components/rigidbody')
   var CentipedeSegment = require('./centipedesegment')
 
   var Head = function(entity) {
@@ -131,6 +132,7 @@ define(function(require) {
   return Entity.Define(function(id, data) {
     this.width = 8
     this.height = 8
+    this.attach(new RigidBody(this))
     this.attach(new Animation(this, 'media/centipede.png', 8, 8))
       .define( 'walkleft', 10, [0, 1], { flipx: true})
       .define( 'walkright', 10, [0, 1])

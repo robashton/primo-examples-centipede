@@ -1,11 +1,13 @@
 define(function(require) {
   var Entity = require('engine/entity')
   var Animation = require('engine/components/animation')
+  var RigidBody = require('engine/components/rigidbody')
 
   return Entity.Define(function() {
     this.width = 12
     this.height = 12
     this.rockType = 0
+    this.attach(new RigidBody(this))
     this.attach(new Animation(this, 'media/rock.png', 12, 12))
       .define( 'idle', 10, [0])
       .define( 'idle1', 10, [1])
