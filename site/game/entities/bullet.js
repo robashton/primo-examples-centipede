@@ -9,7 +9,7 @@ define(function(require) {
     this.height = 4
     this.attach(new Bullet(this))
     this.attach(new Animation(this, 'media/bullet.png', 4, 4))
-      .define('idle', 10, [0, 1, 2])
+      .define('idle', 0.1, [0, 1, 2])
     this.velx = util.valueOrDefault(data.spread, 0)
     this.vely = -data.speed
   })

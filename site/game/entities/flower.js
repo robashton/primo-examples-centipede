@@ -8,6 +8,6 @@ define(function(require) {
     this.height = 6
     this.attach(new RigidBody(this, { weight: 0 }))
     this.attach(new Animation(this, 'media/flower.png', 6, 6 ))
-      .define('idle', 5, [ 0, 1, 2, 3, 4 ])
+      .define('idle', 0.5, [ 0, 1, 2, 3, 4 ])
   })
 })
