@@ -45,7 +45,7 @@ define(function(require) {
         container.raise(sender || this, data);
 
       var proxies = this.proxies
-      for(var i = 0 ; i < proxies ; i++)
+      for(var i = 0 ; i < proxies.length ; i++)
         proxies[i].raise(eventName, data, sender || this)
     },
     addProxy: function(proxy) {
