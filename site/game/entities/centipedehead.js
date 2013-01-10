@@ -130,9 +130,9 @@ define(function(require) {
         this.moveUp()
     },
     onCollided: function(other) {
-      if(other.prototype === Flower.prototype) {
-        this.raise('flower-eaten')
+      if(other instanceof Flower) {
         other.kill()
+        this.entity.raise('flower-eaten')
       }
     }
   }
