@@ -1,10 +1,41 @@
-define(function(require) {
-  var EventContainer = require('eventcontainer');
+ig.module(
+	'game.eventbus'
+)
+.requires(
+
+)
+.defines(function(){
+
+  var EventContainer = function(defaultContext) {
+    this.handlers = [];
+    this.defaultContext = defaultContext;
+  }; 
   
+  EventContainer.prototype = {
+    raise: function(source, data) {
+     var handlerLength = this.handlers.length;
+     for(var i = 0; i < handlerLength; i++) {
+        var handler = this.handlers[i];
+        handler.method.call(handler.context || this.defaultContext, data, source);   
+     }
+    },
+    add: function(method, context) {
+      this.handlers.push({
+        method: method,
+        context: context      
+      });
+    },
+    remove: function(method, context) {
+      this.handlers = _(this.handlers).filter(function(item) {
+        return item.method !== method || item.context !== context;
+      });
+    }
+  };
+
   var Eventable = function() {
     this.eventListeners = {};
+    this.allContainer = new EventContainer(this);
     this.eventDepth = 0;
-    this.proxies = []
   };
   
   Eventable.prototype = {
@@ -32,28 +63,36 @@ define(function(require) {
     },
     
     on: function(eventName, callback, context) {
+      if(!callback)
+        console.log('NO CALLBACK GIVEN')
       this.eventContainerFor(eventName).add(callback, context);
     },
     
     off: function(eventName, callback, context) {
       this.eventContainerFor(eventName).remove(callback, context);
     },
+
+    onAny: function(callback, context) {
+      this.allContainer.add(callback, context);
+    },
+
     raise: function(eventName, data, sender) {
+      this.audit(eventName, data);
       var container = this.eventListeners[eventName];
 
       if(container)
         container.raise(sender || this, data);
+      
+      this.allContainer.raise(sender || this, {
+        event: eventName,
+        data: data
+      });
+    },
+    
+    audit: function(eventName, data) {
+      
+    },
 
-      var proxies = this.proxies
-      for(var i = 0 ; i < proxies.length ; i++)
-        proxies[i].raise(eventName, data, sender || this)
-    },
-    addProxy: function(proxy) {
-      this.proxies.push(proxy)
-    },
-    removeProxy: function(proxy) {
-      this.proxies = _.without(this.proxies, proxy)
-    },
     eventContainerFor: function(eventName) {
       var container = this.eventListeners[eventName];
       if(!container) {
@@ -63,7 +102,10 @@ define(function(require) {
       return container;
     }
   };
-  
-  return Eventable;
 
-});
+  function createEventsGlobal() {
+    Events = new Eventable()
+    Events.clear = createEventsGlobal
+  }
+  createEventsGlobal()
+})
