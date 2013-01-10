@@ -1,15 +1,20 @@
 define(function(require) {
   var _ = require('underscore')
   var util = require('./commons')
+  var Eventable = require('eventable')
 
   var Entity = function(id,data, game) {
+    Eventable.call(this)
     this.id = id
     this.x = util.valueOrDefault(data.x, 0)
     this.y = util.valueOrDefault(data.y, 0)
+    this.lastx = this.x
+    this.lasty = this.y
     this.velx = util.valueOrDefault(data.velx, 0)
     this.vely = util.valueOrDefault(data.vely, 0)
     this.width = util.valueOrDefault(data.width, 0)
     this.height = util.valueOrDefault(data.height, 0)
+    this.collideable = false
     this.game = game
     this.components = []
     this.commandHandlers = {}
@@ -38,11 +43,13 @@ define(function(require) {
         handler(data)
     },
     updatePhysics: function() {
+      this.lastx = this.x
+      this.lasty = this.y
       this.x += this.velx
       this.y += this.vely
     },
     notifyOfCollisionWith: function(other) {
-
+      this.raise('collided', other)
     },
     checkAgainstLevel: function(level) {
       var res = level.checkQuadMovement(
@@ -79,5 +86,6 @@ define(function(require) {
     _.extend(Ctor.prototype, Entity.prototype)
     return Ctor
   }
+  _.extend(Entity.prototype, Eventable.prototype)
   return Entity
 })
