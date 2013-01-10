@@ -3,6 +3,7 @@ define(function(require) {
   var Animation = require('engine/components/animation')
   var RigidBody = require('engine/components/rigidbody')
   var CentipedeSegment = require('./centipedesegment')
+  var Flower = require('./flower')
 
   var Head = function(entity) {
     this.entity = entity
@@ -15,6 +16,7 @@ define(function(require) {
     this.addInitialSegments()
     this.moveRight()
     this.input = this.entity.game.input
+    this.entity.on('collided', this.onCollided, this)
   }
 
   Head.prototype = {
@@ -118,15 +120,21 @@ define(function(require) {
       }
     },
     checkBounds: function() {
-      if(this.x < 0)
+      if(this.entity.x < 0)
         this.moveRight()
-      if(this.x > 312)
+      if(this.entity.x > 312)
         this.moveLeft()
-      if(this.y < 0)
+      if(this.entity.y < 0)
         this.moveDown()
-      if(this.y > 200)
+      if(this.entity.y > 200)
         this.moveUp()
     },
+    onCollided: function(other) {
+      if(other.prototype === Flower.prototype) {
+        this.raise('flower-eaten')
+        other.kill()
+      }
+    }
   }
 
   return Entity.Define(function(id, data) {
