@@ -21,7 +21,7 @@ define(function(require) {
     this.input = new Input(this.canvas)
     this.resources = new Resources()
     this.desiredFps = 30
-    this.frameTime = 1000 / this.desiredFps
+    this.frameTime = 1 / this.desiredFps
     this.tickTimer = new Timer(this.desiredFps)
     this.tick = _.bind(this.tick, this)
   }
@@ -29,7 +29,7 @@ define(function(require) {
   Runner.prototype = {
     start: function() {
       this.raise('init')
-      setInterval(_.bind(this.doTick, this), this.frameTime)
+      setInterval(_.bind(this.doTick, this), this.frameTime * 1000)
     },
     loadLevel: function(path) {
       this.level = new Level(this, path)
