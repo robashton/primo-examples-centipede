@@ -132,7 +132,7 @@ define(function(require) {
     onCollided: function(other) {
       if(other instanceof Flower) {
         other.kill()
-        this.entity.raise('flower-eaten')
+        this.entity.raise('flower-eaten', other)
       }
     }
   }
