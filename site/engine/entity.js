@@ -42,18 +42,19 @@ define(function(require) {
       else
         handler(data)
     },
-    updatePhysics: function() {
+    updatePhysics: function(frameTime) {
       this.lastx = this.x
       this.lasty = this.y
-      this.x += this.velx
-      this.y += this.vely
+      this.x += this.velx * frameTime
+      this.y += this.vely * frameTime
     },
     notifyOfCollisionWith: function(other) {
       this.raise('collided', other)
     },
     checkAgainstLevel: function(level) {
       var res = level.checkQuadMovement(
-        this.x, this.y, this.width, this.height, this.velx, this.vely)
+        this.x, this.y, this.width, this.height, 
+        this.velx * this.frameTime, this.vely * this.frameTime)
 
       if(res.horizontal && res.vertical) {
         this.x = res.x
