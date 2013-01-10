@@ -4,6 +4,7 @@ define(function(require) {
     , Flower = require('./entities/flower')
     , Rock = require('./entities/rock')
     , CentipedeHead = require('./entities/centipedehead')
+    , DefenceUnit = require('./entities/defenceunit')
 
   var CentipedeGame = function(game) {
     Eventable.call(this)
@@ -27,7 +28,8 @@ define(function(require) {
       this.startLevel(1)
       for(var i = 0; i < 10 ; i++) 
         this.spawnRock(Math.random() * 270 + 25, Math.random() * 180 + 30)
-      this.game.spawnEntity(CentipedeHead, { x: 0, y: 0 })
+      var head = this.game.spawnEntity(CentipedeHead, { x: 0, y: 0 })
+      this.game.spawnEntity(DefenceUnit, { x: 0, y: 220, head: head })
     },
     startLevel: function(level) {
       this.level = level

@@ -1,65 +1,60 @@
-ig.module(
-	'game.entities.defenceunit'
-)
-.requires(
-  'impact.entity',
-  'game.entities.bullet'
-)
-.defines(function(){
+define(function(require) {
+  var Entity = require('engine/entity')
+  var Animation = require('engine/components/animation')
+  var Bullet = require('./bullet')
 
-  EntityDefenceUnit = ig.Entity.extend({
-    size: {x: 8, y: 8},
-    speed: 25,
-    bulletSpeed: 20,
-    collides: ig.Entity.COLLIDES.NONE,
-    firingTicks: 0,
-    firingRate: 250,
-    accuracyTolerance: 50,
-    animSheet: new ig.AnimationSheet('media/defenceunit.png', 8, 8),
-    firingStrategies: [
+
+  var DefenceUnit = function(entity, target) {
+    this.entity = entity
+    this.speed = 1.0
+    this.bulletSpeed = 20
+    this.firingTicks = 0
+    this.firingRate = 250
+    this.accuracyTolerance = 50
+    this.target = target
+    this.firingStrategies = [
       function() {
-        ig.game.spawnEntity(EntityBullet, this.pos.x, this.pos.y, {
+        /*   this.game.spawnEntity(EntityBullet, this.pos.x, this.pos.y, {
           speed: this.bulletSpeed
-        })
+        }) */
       }, 
       function() {
+        /*
         var count = 5
         var self = this
         var fire = function() {
-          ig.game.spawnEntity(EntityBullet, self.pos.x, self.pos.y, {
+          this.game.spawnEntity(EntityBullet, self.pos.x, self.pos.y, {
             speed: self.bulletSpeed
           })
           if(count-- > 0)
             setTimeout(fire, 1000)
         }
-        fire()
+        fire() */
       }, 
       function() {
+        /*
         for(var i = 0 ; i < 10; i++) {
-          ig.game.spawnEntity(EntityBullet, this.pos.x, this.pos.y, {
+          this.game.spawnEntity(EntityBullet, this.pos.x, this.pos.y, {
             speed: this.bulletSpeed,
             spread: (5 - i) * 2.0
           })
         }
-      }
-    ],
-    init: function( x, y, settings ) {
-      this.parent( x, y, settings );
-      this.head = settings.head
-      this.addAnim( 'idle', 1.0, [0]);
-    },
-    update: function() {
-      this.parent()
+        */
+      }]
+  }
+
+  DefenceUnit.prototype = {
+    tick: function() {
       this.updateFiringTicks()
       this.updateVelocity()
-      if(Math.abs(this.head.pos.x - this.pos.x) < this.accuracyTolerance)
+      if(Math.abs(this.target.x - this.x) < this.accuracyTolerance)
         this.tryFire()
     },
     updateVelocity: function() {
-      if(this.head.pos.x < this.pos.x)
-        this.vel.x = -this.speed
-      else if(this.head.pos.x > this.pos.x)
-        this.vel.x = this.speed
+      if(this.target.x < this.entity.x)
+        this.entity.velx = -this.speed
+      else if(this.target.x > this.entity.x)
+        this.entity.velx = this.speed
     },
     updateFiringTicks: function() {
       if(this.firingTicks !== 0) {
@@ -80,6 +75,15 @@ ig.module(
       ]
       strategy.call(this)
     }
+  }
+  
+  return Entity.Define(function(id, data) {
+    this.width = 8
+    this.height = 8
+    this.attach(new DefenceUnit(this, data.head))
+    this.attach(new Animation(this, 'media/defenceunit.png', 8, 8))
+      .define('idle', 10, [0])
   })
 
 })
+
