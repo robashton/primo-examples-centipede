@@ -11,12 +11,13 @@ define(function(require) {
     this.maxSegments = 20
     this.segments = []
     this.history = []
-    this.speed = 2,
+    this.speed = 30,
     this.direction = ''
     this.addInitialSegments()
     this.moveRight()
     this.input = this.entity.game.input
     this.entity.on('collided', this.onCollided, this)
+    this.entity.game.on('level-changed', this.onLevelChanged, this)
   }
 
   Head.prototype = {
@@ -128,6 +129,9 @@ define(function(require) {
         this.moveDown()
       if(this.entity.y > 200)
         this.moveUp()
+    },
+    onLevelChanged: function(level) {
+      this.speed = 50 + (level * 10)
     },
     onCollided: function(other) {
       if(other instanceof Flower) {

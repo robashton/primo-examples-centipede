@@ -12,6 +12,7 @@ define(function(require) {
     this.firingRate = 250
     this.accuracyTolerance = 50
     this.target = target
+    this.entity.game.on('level-changed', this.onLevelChanged, this)
     this.firingStrategies = [
       function() {
         this.entity.game.spawnEntity(Bullet, {
@@ -77,6 +78,12 @@ define(function(require) {
         Math.floor(Math.random() * this.firingStrategies.length)
       ]
       strategy.call(this)
+    },
+    onLevelChanged: function(level) {
+      this.bulletSpeed = 40 + (level*5)
+      this.firingRate = Math.floor(Math.max(150 - (level * 10), 30))
+      this.speed = 25 + level*2
+      this.accuracyTolerance = 30 + (level * 5)
     }
   }
   
