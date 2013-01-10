@@ -3,8 +3,8 @@ define(function(require) {
   
   var Eventable = function() {
     this.eventListeners = {};
-    this.allContainer = new EventContainer(this);
     this.eventDepth = 0;
+    this.proxies = []
   };
   
   Eventable.prototype = {
@@ -38,28 +38,22 @@ define(function(require) {
     off: function(eventName, callback, context) {
       this.eventContainerFor(eventName).remove(callback, context);
     },
-
-    onAny: function(callback, context) {
-      this.allContainer.add(callback, context);
-    },
-
     raise: function(eventName, data, sender) {
-      this.audit(eventName, data);
       var container = this.eventListeners[eventName];
 
       if(container)
         container.raise(sender || this, data);
-      
-      this.allContainer.raise(sender || this, {
-        event: eventName,
-        data: data
-      });
-    },
-    
-    audit: function(eventName, data) {
-      
-    },
 
+      var proxies = this.proxies
+      for(var i = 0 ; i < proxies ; i++)
+        proxies[i].raise(eventName, data, sender || this)
+    },
+    addProxy: function(proxy) {
+      this.proxies.push(proxy)
+    },
+    removeProxy: function(proxy) {
+      this.proxies = _.without(this.proxies, proxy)
+    },
     eventContainerFor: function(eventName) {
       var container = this.eventListeners[eventName];
       if(!container) {
