@@ -7,39 +7,42 @@ define(function(require) {
   var DefenceUnit = function(entity, target) {
     this.entity = entity
     this.speed = 1.0
-    this.bulletSpeed = 20
+    this.bulletSpeed = 0.6
     this.firingTicks = 0
     this.firingRate = 250
     this.accuracyTolerance = 50
     this.target = target
     this.firingStrategies = [
       function() {
-        /*   this.game.spawnEntity(EntityBullet, this.pos.x, this.pos.y, {
+        this.entity.game.spawnEntity(Bullet, {
+          x: this.entity.x,
+          y: this.entity.y, 
           speed: this.bulletSpeed
-        }) */
+        }) 
       }, 
       function() {
-        /*
         var count = 5
         var self = this
         var fire = function() {
-          this.game.spawnEntity(EntityBullet, self.pos.x, self.pos.y, {
+          self.entity.game.spawnEntity(Bullet, {
+            x: self.entity.x,
+            y: self.entity.y, 
             speed: self.bulletSpeed
           })
           if(count-- > 0)
             setTimeout(fire, 1000)
         }
-        fire() */
+        fire() 
       }, 
       function() {
-        /*
         for(var i = 0 ; i < 10; i++) {
-          this.game.spawnEntity(EntityBullet, this.pos.x, this.pos.y, {
+          this.entity.game.spawnEntity(Bullet, {
+            x: this.entity.x,
+            y: this.entity.y, 
             speed: this.bulletSpeed,
             spread: (5 - i) * 2.0
           })
         }
-        */
       }]
   }
 
@@ -47,7 +50,7 @@ define(function(require) {
     tick: function() {
       this.updateFiringTicks()
       this.updateVelocity()
-      if(Math.abs(this.target.x - this.x) < this.accuracyTolerance)
+      if(Math.abs(this.target.x - this.entity.x) < this.accuracyTolerance)
         this.tryFire()
     },
     updateVelocity: function() {
