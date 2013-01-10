@@ -56,7 +56,7 @@ define(function(require) {
       var self = this
       if(Math.random() > 0.3)
         setTimeout(function() {
-          self.spawnRock(flower.pos.x, flower.pos.y)
+          self.spawnRock(flower.x, flower.y)
         }, 3000)
     }
   }
