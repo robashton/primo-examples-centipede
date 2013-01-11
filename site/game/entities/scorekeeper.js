@@ -8,12 +8,15 @@ define(function(require) {
       this.totalflowers = 0
       this.longeststreak = 0
       this.currentstreak = 0
+      this.level = 1
       this.x = 0
       this.y = 232
+      this.height = 8
+      this.game.on('level-changed', this.onLevelChanged, this)
       this.game.on('flower-eaten', this.onFlowerEaten, this)
       this.game.on('rock-destroyed', this.onRockDestroyed, this)
       this.game.on('player-damaged', this.onPlayerDamaged, this)
-      this.text = this.attach(new Text(this, 'Score :'))
+      this.text = this.attach(new Text(this, 'Score: 0'))
     }, {
     getStats: function() {
       return {
@@ -23,15 +26,19 @@ define(function(require) {
         longeststreak: this.longeststreak
       }
     },
+    onLevelChanged: function(level) {
+      this.level = level
+    },
     onFlowerEaten: function(flower) {
       this.currentstreak++
       this.totalflowers++
-      var change = this.world.level * this.currentstreak
+      var change = this.level * this.currentstreak
       this.score += change
+      this.text.display('Score: ' + this.score)
       this.raise('score-changed', {
         amount: change,
-        x: flower.pos.x,
-        y: flower.pos.y
+        x: flower.x,
+        y: flower.y
       })
     },
     onRockDestroyed: function(rock) {

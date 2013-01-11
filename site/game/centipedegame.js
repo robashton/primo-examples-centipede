@@ -6,6 +6,7 @@ define(function(require) {
     , CentipedeHead = require('./entities/centipedehead')
     , DefenceUnit = require('./entities/defenceunit')
     , Messaging = require('./entities/messaging')
+    , ScoreKeeper = require('./entities/scorekeeper')
 
   var CentipedeGame = function(game) {
     Eventable.call(this)
@@ -31,9 +32,7 @@ define(function(require) {
       var head = this.game.spawnEntity(CentipedeHead, { x: 0, y: 0 })
       this.game.spawnEntity(DefenceUnit, { x: 0, y: 220, head: head })
       this.messaging = this.game.spawnEntity(Messaging)
-      /*      this.scorekeeper = this.game.spawnEntity(EntityScoreDisplay, 0, 0, {
-        world: this.world
-      }) */
+      this.scorekeeper = this.game.spawnEntity(ScoreKeeper)
       this.startLevel(1)
     },
     startLevel: function(level) {
@@ -58,7 +57,7 @@ define(function(require) {
     },
     onFlowerEaten: function(flower) {
       if(--this.flowercount <= 0) 
-        this.startLevel(this.level++)
+        this.startLevel(this.level+1)
       else 
         this.spawnFlower()
       var self = this
