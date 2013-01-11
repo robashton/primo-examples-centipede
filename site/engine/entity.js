@@ -90,10 +90,9 @@ define(function(require) {
       Entity.call(this, id, data, game)
       init.call(this, id, data)
     }
-
-    methods = methods || []
-    methods.push(Entity.prototype)
-    _.extend(Ctor.prototype, methods)
+    _.extend(Ctor.prototype, Entity.prototype)
+    if(methods)
+      _.extend(Ctor.prototype, methods)
     return Ctor
   }
   _.extend(Entity.prototype, Eventable.prototype)
