@@ -1,4 +1,5 @@
 define(function(require) {
+  var _ = require('underscore')
   var Entity = require('engine/entity')
   var Animation = require('engine/components/animation')
   var RigidBody = require('engine/components/rigidbody')
@@ -14,10 +15,10 @@ define(function(require) {
     this.speed = 30,
     this.direction = ''
     this.addInitialSegments()
-    this.moveRight()
     this.input = this.entity.game.input
     this.entity.on('collided', this.onCollided, this)
     this.entity.game.on('level-changed', this.onLevelChanged, this)
+    this.entity.handle('hitbybullet', _.bind(this.damage, this))
   }
 
   Head.prototype = {
@@ -73,13 +74,13 @@ define(function(require) {
     },
     damage: function() {
       if(this.segments.length === 0) {
-        this.raise('player-died')
-        //this.kill()
+        this.entity.raise('player-died')
+        this.entity.kill()
         return
       }
-      this.raise('player-damaged')
+      this.entity.raise('player-damaged')
       var segment = this.segments.pop()
-      // segment.kill()
+      segment.kill()
     },
     grow: function() {
       if(this.segments.length === this.maxSegments) return
@@ -132,6 +133,8 @@ define(function(require) {
     },
     onLevelChanged: function(level) {
       this.speed = 50 + (level * 10)
+      if(this.direction === '')
+        this.moveRight()
     },
     onCollided: function(other) {
       if(other instanceof Flower) {

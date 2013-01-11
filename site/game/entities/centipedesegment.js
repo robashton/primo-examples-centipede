@@ -1,13 +1,18 @@
 define(function(require) {
+  var _ = require('underscore')
   var Entity = require('engine/entity')
   var Animation = require('engine/components/animation')
   var RigidBody = require('engine/components/rigidbody')
+  var DeadSegment = require('./deadsegment')
+  var Rock = require('./rock')
 
   var Trailer = function(entity, head, index) {
     this.entity = entity
     this.head = head
     this.index = index
     this.direction = ''
+    this.entity.handle('hitbybullet', _.bind(this.hitByBullet, this))
+    this.entity.on('killed', this.onKilled, this)
   }
 
   Trailer.prototype = {
@@ -21,6 +26,17 @@ define(function(require) {
       this.entity.y = position.y
       this.direction = position.direction
     },
+    hitByBullet: function() {
+      this.head.damage()
+    },
+    onKilled: function() {
+      this.entity.game.spawnEntity( DeadSegment, { x: this.entity.x, y: this.entity.y } )
+      if(Math.random() < 0.3)
+        var self = this
+        setTimeout(function() {
+            self.entity.game.spawnEntity( Rock, { x: self.entity.x, y: self.entity.y } )
+        }, 1000)
+    }
   }
 
   return Entity.Define(function(id, data) {
@@ -34,23 +50,5 @@ define(function(require) {
       .define( 'walkdown', 0.1, [10,11])
       .define( 'walkup', 0.1, [10,11])
   })
-})
 
-/*
-    check: function(other) {
-      this.parent(other)
-      if(other instanceof EntityBullet) {
-        this.head.damage()
-        other.kill()
-      }
-    },
-    kill: function() {
-      this.parent()
-      ig.game.spawnEntity( EntityDeadSegment, this.pos.x, this.pos.y )
-      if(Math.random() < 0.3)
-        var self = this
-        setTimeout(function() {
-            ig.game.spawnEntity( EntityRock, self.pos.x, self.pos.y )
-        }, 1000)
-    }
-  */
+})

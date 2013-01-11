@@ -7,7 +7,7 @@ define(function(require) {
   var DefenceUnit = function(entity, target) {
     this.entity = entity
     this.speed = 1.0
-    this.bulletSpeed = 0.6
+    this.bulletSpeed = 40
     this.firingTicks = 0
     this.firingRate = 250
     this.accuracyTolerance = 50
@@ -59,6 +59,8 @@ define(function(require) {
         this.entity.velx = -this.speed
       else if(this.target.x > this.entity.x)
         this.entity.velx = this.speed
+      else
+        this.entity.velx = 0
     },
     updateFiringTicks: function() {
       if(this.firingTicks !== 0) {
@@ -81,7 +83,7 @@ define(function(require) {
     },
     onLevelChanged: function(level) {
       this.bulletSpeed = 40 + (level*5)
-      this.firingRate = Math.floor(Math.max(150 - (level * 10), 30))
+      this.firingRate = Math.floor(Math.max(80 - (level * 5), 15))
       this.speed = 25 + level*2
       this.accuracyTolerance = 30 + (level * 5)
     }
