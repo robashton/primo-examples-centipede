@@ -5,6 +5,7 @@ define(function(require) {
     , Rock = require('./entities/rock')
     , CentipedeHead = require('./entities/centipedehead')
     , DefenceUnit = require('./entities/defenceunit')
+    , Messaging = require('./entities/messaging')
 
   var CentipedeGame = function(game) {
     Eventable.call(this)
@@ -29,6 +30,10 @@ define(function(require) {
         this.spawnRock(Math.random() * 270 + 25, Math.random() * 180 + 30)
       var head = this.game.spawnEntity(CentipedeHead, { x: 0, y: 0 })
       this.game.spawnEntity(DefenceUnit, { x: 0, y: 220, head: head })
+      this.messaging = this.game.spawnEntity(Messaging)
+      /*      this.scorekeeper = this.game.spawnEntity(EntityScoreDisplay, 0, 0, {
+        world: this.world
+      }) */
       this.startLevel(1)
     },
     startLevel: function(level) {
@@ -65,11 +70,5 @@ define(function(require) {
   }
   _.extend(CentipedeGame.prototype, Eventable.prototype)
 
-      /*
-      this.messaging = this.game.spawnEntity(EntityMessaging, 0,0)
-      this.scorekeeper = this.game.spawnEntity(EntityScoreDisplay, 0, 0, {
-        world: this.world
-      })
-      */
    return CentipedeGame
 })
