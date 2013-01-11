@@ -85,12 +85,15 @@ define(function(require) {
     }
   }
 
-  Entity.Define = function(init) {
+  Entity.Define = function(init, methods) {
     var Ctor = function(id, data, game) {
       Entity.call(this, id, data, game)
       init.call(this, id, data)
     }
-    _.extend(Ctor.prototype, Entity.prototype)
+
+    methods = methods || []
+    methods.push(Entity.prototype)
+    _.extend(Ctor.prototype, methods)
     return Ctor
   }
   _.extend(Entity.prototype, Eventable.prototype)
