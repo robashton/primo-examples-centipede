@@ -1,5 +1,5 @@
 {
-  "engine-harness": "",
+  "name" : "primojs",
   "version": "1.0.0",
   "dependencies": {
     "send": "~0.1.0",
