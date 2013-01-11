@@ -26,8 +26,8 @@ define(function(require) {
       this.components.push(component)
       return component
     },
-    tick: function() {
-      _(this.components).each(function(c) { if(c.tick) c.tick() })
+    tick: function(frameTime) {
+      _(this.components).each(function(c) { if(c.tick) c.tick(frameTime) })
     },
     render: function(context) {
       _(this.components).each(function(c) { if(c.render) c.render(context) })
