@@ -78,6 +78,7 @@ define(function(require) {
       }
     },
     kill: function() {
+      this.raise('killed')
       this.game.removeEntity(this)
       // TODO: Remove all handlers etc?
     }
