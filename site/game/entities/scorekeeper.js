@@ -1,26 +1,20 @@
-ig.module(
-	'game.entities.scoredisplay'
-)
-.requires(
-  'impact.entity',
-  'game.eventbus'
-)
-.defines(function(){
+define(function(require) {
+  var Entity = require('engine/entity')
+  var Text = require('engine/components/text')
 
-  EntityScoreDisplay = ig.Entity.extend({
-    font: new ig.Font( 'media/04b03.font.png' ),
-    init: function( x, y, settings ) {
-      this.parent( x, y, settings );
-      this.world = settings.world
+  return Entity.Define(function(id, data) {
       this.score = 0
       this.totalrocks = 0
       this.totalflowers = 0
       this.longeststreak = 0
       this.currentstreak = 0
-      Events.on('flower-eaten', this.onFlowerEaten, this)
-      Events.on('rock-destroyed', this.onRockDestroyed, this)
-      Events.on('player-damaged', this.onPlayerDamaged, this)
-    },
+      this.x = 0
+      this.y = 232
+      this.game.on('flower-eaten', this.onFlowerEaten, this)
+      this.game.on('rock-destroyed', this.onRockDestroyed, this)
+      this.game.on('player-damaged', this.onPlayerDamaged, this)
+      this.text = this.attach(new Text(this, 'Score :'))
+    }, {
     getStats: function() {
       return {
         score: this.score,
@@ -34,7 +28,7 @@ ig.module(
       this.totalflowers++
       var change = this.world.level * this.currentstreak
       this.score += change
-      Events.raise('score-changed', {
+      this.raise('score-changed', {
         amount: change,
         x: flower.pos.x,
         y: flower.pos.y
@@ -47,9 +41,6 @@ ig.module(
       if(this.currentstreak > this.longeststreak)
         this.longeststreak = this.currentstreak
       this.currentstreak = 0
-    },
-    draw: function() {
-      this.font.draw('Score: ' + this.score, 0, 232,  ig.Font.ALIGN_LEFT)
     }
   })
 })
