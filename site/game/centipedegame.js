@@ -30,7 +30,7 @@ define(function(require) {
       for(var i = 0; i < 10 ; i++) 
         this.spawnRock(Math.random() * 270 + 25, Math.random() * 180 + 30)
       var head = this.game.spawnEntity(CentipedeHead, { x: 0, y: 0 })
-      this.game.spawnEntity(DefenceUnit, { x: 0, y: 220, head: head })
+      this.game.spawnEntity(DefenceUnit, { x: 0, y: 218, head: head })
       this.messaging = this.game.spawnEntity(Messaging)
       this.scorekeeper = this.game.spawnEntity(ScoreKeeper)
       this.startLevel(1)
