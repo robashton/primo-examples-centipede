@@ -4,8 +4,9 @@ define(function(require) {
   var TimedRemoval = require('../components/timedremoval')
 
   return Entity.Define(function(id, data) {
-    this.attach(new Text(this, data.text))
+    this.height = 12
+    this.vely = -12
+    this.attach(new Text(this, data.text, '#FFF'))
     this.attach(new TimedRemoval(this, data.time))
-    this.vely = -6
   })
 })

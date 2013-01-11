@@ -6,6 +6,7 @@ define(function(require) {
   var Entity = function(id,data, game) {
     Eventable.call(this)
     this.id = id
+    data = data || {}
     this.x = util.valueOrDefault(data.x, 0)
     this.y = util.valueOrDefault(data.y, 0)
     this.lastx = this.x
