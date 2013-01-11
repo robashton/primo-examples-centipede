@@ -139,6 +139,7 @@ define(function(require) {
     onCollided: function(other) {
       if(other instanceof Flower) {
         other.kill()
+        this.grow()
         this.entity.raise('flower-eaten', other)
       }
     }
