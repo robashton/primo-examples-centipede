@@ -11,6 +11,9 @@ define(function(require) {
       context.fillStyle = this.colour
       context.font = this.entity.height + 'px sans-serif'
       context.fillText(this.text, this.entity.x, this.entity.y)
+    },
+    display: function(text) {
+      this.text = text
     }
   }
 
