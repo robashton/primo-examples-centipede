@@ -5,6 +5,8 @@
     "send": "~0.1.0",
     "express": "~3.0.3",
     "underscore": "~1.4.3",
+  },
+  "devDependencies": {
     "primo-core": ""
   },
   "engines": {
