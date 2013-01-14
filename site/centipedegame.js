@@ -68,4 +68,4 @@ CentipedeGame.prototype = {
 }
 _.extend(CentipedeGame.prototype, Eventable.prototype)
 
- return CentipedeGame
+module.exports = CentipedeGame
