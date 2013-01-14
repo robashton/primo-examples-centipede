@@ -438,13 +438,13 @@ require.define("/node_modules/primo-core/package.json",function(require,module,e
 require.define("/node_modules/primo-core/index.js",function(require,module,exports,__dirname,__filename,process,global){var Eventable = require('primo-events')
 var _ = require('underscore')
 var Camera = require('primo-camera')
+var Timer = require('primo-timer')
 
 // Some of these will be modules
 var Level = require('./lib/level')
 var Input = require('./lib/input')
 var Resources = require('./lib/resources')
 var CollisionGrid = require('./lib/collisiongrid')
-var Timer = require('./lib/timer')
 
 var Runner = function(targetid) {
   Eventable.call(this)
@@ -3230,11 +3230,39 @@ module.exports = Camera
 
 });
 
+require.define("/node_modules/primo-core/node_modules/primo-timer/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"timer.js"}
+});
+
+require.define("/node_modules/primo-core/node_modules/primo-timer/timer.js",function(require,module,exports,__dirname,__filename,process,global){var Timer = function(desiredFps) {
+  this.timeAtLastFrame = new Date().getTime()
+  this.idealTimePerFrame = 1000 / desiredFps
+  this.leftover = 0
+}
+
+Timer.prototype = {
+  tick: function(cb) {
+    var timeAtThisFrame = new Date().getTime()
+      , timeSinceLastTick = timeAtThisFrame - this.timeAtLastFrame + this.leftover
+      , catchUpFrameCount = Math.floor(timeSinceLastTick / this.idealTimePerFrame)
+
+    for(var i = 0; i < catchUpFrameCount; i++)
+      cb()
+
+    this.leftover = timeSinceLastTick - (catchUpFrameCount * this.idealTimePerFrame)
+    this.timeAtLastFrame = timeAtThisFrame
+  }
+}
+
+module.exports = Timer
+
+
+});
+
 require.define("/node_modules/primo-core/lib/level.js",function(require,module,exports,__dirname,__filename,process,global){var Eventable = require('primo-events')
 var _ = require('underscore')
+var SpriteMap = require('primo-spritemap')
 
 var Layer = require('./layer')
-var SpriteMap = require('./spritemap')
 
 var Level = function(engine, path) {
   Eventable.call(this)
@@ -3442,75 +3470,10 @@ module.exports = Level
 
 });
 
-require.define("/node_modules/primo-core/lib/layer.js",function(require,module,exports,__dirname,__filename,process,global){var SpriteMap = require('./spritemap')
-
-var Layer = function(level, index) {
-  this.level = level
-  this.config = this.level.layerdata(index)
-  this.index = index
-  this.hidden = false
-}
-Layer.prototype = {
-  name: function() {
-    return this.config.name
-  },
-  tileset: function() {
-    return this.level.tileset(this.config.tileset)
-  },
-  setTileAt: function(x, y, tile) {
-    this.level.setTileAt(this.index, x, y, tile)
-  },
-  getTileAt: function(x, y, tile) {
-    return this.level.getTileAt(this.index, x, y, tile)
-  },
-  iscollision: function(value) {
-    if(typeof value !== 'undefined') {
-      this.config.collision = value
-    }
-    return !!this.config.collision
-  },
-  solidAt: function(x, y) {
-    var tilex = parseInt( x / this.level.tilesize(), 10)
-    var tiley = parseInt( y / this.level.tilesize(), 10)
-    var remainderx = x % this.level.tilesize()
-    var remaindery = y % this.level.tilesize()
-
-    var index = this.config.data[tilex + tiley * this.level.width()]
-    if(index === null) return false
-    return this.spritemap().hasPixelAt(index, remainderx, remaindery)
-  },
-  hide: function() {
-    this.hidden = true
-  },
-  show: function() {
-    this.hidden = false
-  },
-  spritemap: function() {
-    return this.level.spritemap(this.config.tileset)
-  },
-  render: function(context) {
-    if(this.hidden) return
-    for(var x = 0; x < this.level.width() ; x++) {
-      for(var y = 0; y < this.level.height() ; y++) {
-        var index = x + (y * this.level.width())
-        var left = x * this.level.tilesize()
-        var top = y * this.level.tilesize()
-
-        if(this.config.data[index] === null)
-          continue
-
-        this.spritemap().drawTo(context, 
-          this.config.data[index], 
-          left, top, this.level.tilesize(), this.level.tilesize());
-      }
-    }
-  }
-}
-module.exports = Layer
-
+require.define("/node_modules/primo-core/node_modules/primo-spritemap/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"spritemap.js"}
 });
 
-require.define("/node_modules/primo-core/lib/spritemap.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
+require.define("/node_modules/primo-core/node_modules/primo-spritemap/spritemap.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
 var MemoryCanvas = require('primo-canvas')
 var Eventable = require('primo-events')
 
@@ -3567,6 +3530,7 @@ SpriteMap.prototype = {
         function() { 
           this.generateCollisionMaps(width, height) }, this)
 
+    // TODO: This doesn't really belong here, it needs storing elsewhere or returning
     this.collisionmapsize = width
     var canvas = new MemoryCanvas(width, height)
 
@@ -3655,6 +3619,74 @@ module.exports = MemoryCanvas
 
 });
 
+require.define("/node_modules/primo-core/lib/layer.js",function(require,module,exports,__dirname,__filename,process,global){var SpriteMap = require('primo-spritemap')
+
+var Layer = function(level, index) {
+  this.level = level
+  this.config = this.level.layerdata(index)
+  this.index = index
+  this.hidden = false
+}
+Layer.prototype = {
+  name: function() {
+    return this.config.name
+  },
+  tileset: function() {
+    return this.level.tileset(this.config.tileset)
+  },
+  setTileAt: function(x, y, tile) {
+    this.level.setTileAt(this.index, x, y, tile)
+  },
+  getTileAt: function(x, y, tile) {
+    return this.level.getTileAt(this.index, x, y, tile)
+  },
+  iscollision: function(value) {
+    if(typeof value !== 'undefined') {
+      this.config.collision = value
+    }
+    return !!this.config.collision
+  },
+  solidAt: function(x, y) {
+    var tilex = parseInt( x / this.level.tilesize(), 10)
+    var tiley = parseInt( y / this.level.tilesize(), 10)
+    var remainderx = x % this.level.tilesize()
+    var remaindery = y % this.level.tilesize()
+
+    var index = this.config.data[tilex + tiley * this.level.width()]
+    if(index === null) return false
+    return this.spritemap().hasPixelAt(index, remainderx, remaindery)
+  },
+  hide: function() {
+    this.hidden = true
+  },
+  show: function() {
+    this.hidden = false
+  },
+  spritemap: function() {
+    return this.level.spritemap(this.config.tileset)
+  },
+  render: function(context) {
+    if(this.hidden) return
+    for(var x = 0; x < this.level.width() ; x++) {
+      for(var y = 0; y < this.level.height() ; y++) {
+        var index = x + (y * this.level.width())
+        var left = x * this.level.tilesize()
+        var top = y * this.level.tilesize()
+
+        if(this.config.data[index] === null)
+          continue
+
+        this.spritemap().drawTo(context, 
+          this.config.data[index], 
+          left, top, this.level.tilesize(), this.level.tilesize());
+      }
+    }
+  }
+}
+module.exports = Layer
+
+});
+
 require.define("/node_modules/primo-core/lib/input.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
 var Eventable = require('primo-events')
 
@@ -3696,9 +3728,9 @@ module.exports = Input
 
 });
 
-require.define("/node_modules/primo-core/lib/resources.js",function(require,module,exports,__dirname,__filename,process,global){var SpriteMap = require('./spritemap')
-var TextureResource = require('./textureresource')
+require.define("/node_modules/primo-core/lib/resources.js",function(require,module,exports,__dirname,__filename,process,global){var SpriteMap = require('primo-spritemap')
 var SoundResource = require('primo-audio')
+var TextureResource = require('./textureresource')
 
 var Resources = function() {
   this.cache = {}
@@ -3738,38 +3770,6 @@ Resources.prototype = {
 
 module.exports = Resources
 
-
-});
-
-require.define("/node_modules/primo-core/lib/textureresource.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
-  , Eventable = require('primo-events')
-
-var TextureResource = function(path) {
-  Eventable.call(this)
-  this.path = path
-  this.loaded = false
-  this.image = new Image()
-  this.image.src = path
-  this.image.onload = _.bind(this.onLoaded, this)
-}
-
-TextureResource.prototype = {
-  get: function() {
-    return this.image
-  },
-  onLoaded: function() {
-    this.loaded = true
-    this.raise('loaded')
-  },
-  waitForLoaded: function(cb) {
-    if(this.loaded) cb()
-    else this.once('loaded', cb)
-  }
-}
-
-_.extend(TextureResource.prototype, Eventable.prototype)
-
-module.exports = TextureResource
 
 });
 
@@ -5262,6 +5262,38 @@ module.exports = EventContainer;
 
 });
 
+require.define("/node_modules/primo-core/lib/textureresource.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
+  , Eventable = require('primo-events')
+
+var TextureResource = function(path) {
+  Eventable.call(this)
+  this.path = path
+  this.loaded = false
+  this.image = new Image()
+  this.image.src = path
+  this.image.onload = _.bind(this.onLoaded, this)
+}
+
+TextureResource.prototype = {
+  get: function() {
+    return this.image
+  },
+  onLoaded: function() {
+    this.loaded = true
+    this.raise('loaded')
+  },
+  waitForLoaded: function(cb) {
+    if(this.loaded) cb()
+    else this.once('loaded', cb)
+  }
+}
+
+_.extend(TextureResource.prototype, Eventable.prototype)
+
+module.exports = TextureResource
+
+});
+
 require.define("/node_modules/primo-core/lib/collisiongrid.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
 
 var Bucket = function(id) {
@@ -5367,31 +5399,6 @@ CollisionGrid.prototype = {
 }
 
 module.exports = CollisionGrid
-
-
-});
-
-require.define("/node_modules/primo-core/lib/timer.js",function(require,module,exports,__dirname,__filename,process,global){var Timer = function(desiredFps) {
-  this.timeAtLastFrame = new Date().getTime()
-  this.idealTimePerFrame = 1000 / desiredFps
-  this.leftover = 0
-}
-
-Timer.prototype = {
-  tick: function(cb) {
-    var timeAtThisFrame = new Date().getTime()
-      , timeSinceLastTick = timeAtThisFrame - this.timeAtLastFrame + this.leftover
-      , catchUpFrameCount = Math.floor(timeSinceLastTick / this.idealTimePerFrame)
-
-    for(var i = 0; i < catchUpFrameCount; i++)
-      cb()
-
-    this.leftover = timeSinceLastTick - (catchUpFrameCount * this.idealTimePerFrame)
-    this.timeAtLastFrame = timeAtThisFrame
-  }
-}
-
-module.exports = Timer
 
 
 });
@@ -8166,7 +8173,7 @@ require.define("/node_modules/primo-core/lib/commons.js",function(require,module
 });
 
 require.define("/node_modules/primo-core/lib/components/animation.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
-var SpriteMap = require('../spritemap')
+var SpriteMap = require('primo-spritemap')
 
 var Animation = function(entity, path, spritewidth, spriteheight) {
   this.entity = entity
