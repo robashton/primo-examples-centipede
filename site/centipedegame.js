@@ -53,7 +53,7 @@ CentipedeGame.prototype = {
     this.game.spawnEntity(Rock, {x: x, y: y})
   },
   onPlayerDied: function() {
-    this.raise('game-over')
+    this.raise('game-over', this.scorekeeper.getStats())
     this.enabled = false
   },
   onFlowerEaten: function(flower) {

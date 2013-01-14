@@ -12,5 +12,8 @@ module.exports = Entity.Define(function() {
   this.attach(new Shrinker(this, [12, 8, 4]))
   this.attach(new Animation(this, 'media/rock.png', 12, 12))
     .define( 'idle', 10, [0])
+  this.on('killed', function() { 
+    this.raise('rock-destroyed', this)
+  }, this)
 })
 
