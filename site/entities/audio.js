@@ -6,13 +6,13 @@ module.exports = Entity.Define(function(id, data) {
   var fire = this.game.resources.sound('media/fire')
   var pickup = this.game.resources.sound('media/pickup')
 
-  this.game.on('player-damaged', function() {
+  this.scene.on('player-damaged', function() {
     hurt.play()
   })
-  this.game.on('bullet-fired', function() {
+  this.scene.on('bullet-fired', function() {
     fire.play()
   })
-  this.game.on('flower-eaten', function() {
+  this.scene.on('flower-eaten', function() {
     pickup.play()
   })
 })

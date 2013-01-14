@@ -3,13 +3,13 @@ var FloatingText = require('./floatingtext')
 
 module.exports = Entity.Define(function(id, data) {
   this.messages = []
-  var game = this.game
-  this.game.on('level-changed', function(level) {
-    game.spawnEntity(FloatingText, 
+  var scene = this.scene
+  this.scene.on('level-changed', function(level) {
+    scene.spawnEntity(FloatingText, 
       { x: 160, y: 120, text: 'Level ' + level, time: 2})
   })
-  this.game.on('score-changed', function(ev) {
-    game.spawnEntity(FloatingText, 
+  this.scene.on('score-changed', function(ev) {
+    scene.spawnEntity(FloatingText, 
       { x: ev.x, y: ev.y, text: ev.amount, time: 2})
   })
 })

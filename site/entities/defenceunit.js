@@ -10,10 +10,10 @@ var DefenceUnit = function(entity, target) {
   this.firingRate = 250
   this.accuracyTolerance = 50
   this.target = target
-  this.entity.game.on('level-changed', this.onLevelChanged, this)
+  this.entity.scene.on('level-changed', this.onLevelChanged, this)
   this.firingStrategies = [
     function() {
-      this.entity.game.spawnEntity(Bullet, {
+      this.entity.scene.spawnEntity(Bullet, {
         x: this.entity.x,
         y: this.entity.y, 
         speed: this.bulletSpeed
@@ -23,7 +23,7 @@ var DefenceUnit = function(entity, target) {
       var count = 5
       var self = this
       var fire = function() {
-        self.entity.game.spawnEntity(Bullet, {
+        self.entity.scene.spawnEntity(Bullet, {
           x: self.entity.x,
           y: self.entity.y, 
           speed: self.bulletSpeed
@@ -35,7 +35,7 @@ var DefenceUnit = function(entity, target) {
     }, 
     function() {
       for(var i = 0 ; i < 10; i++) {
-        this.entity.game.spawnEntity(Bullet, {
+        this.entity.scene.spawnEntity(Bullet, {
           x: this.entity.x,
           y: this.entity.y, 
           speed: this.bulletSpeed,

@@ -1,4 +1,4 @@
-var Runner = require('primo-core')
+var Primo = require('primo-core')
 var CentipedeGame = require('./centipedegame')
 
 var $start = $('#start')
@@ -40,7 +40,7 @@ var $start = $('#start')
   }
 
   function startGame() {
-    var runner = new Runner('canvas')
+    var runner = Primo.Create('canvas')
     game = new CentipedeGame(runner)
     runner.on('init', function() {
       game.start()

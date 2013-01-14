@@ -24,7 +24,7 @@ module.exports = Entity.Define(function(id, data) {
   this.direction = ''
   this.addInitialSegments()
   this.input = this.game.input
-  this.game.on('level-changed', this.onLevelChanged, this)
+  this.scene.on('level-changed', this.onLevelChanged, this)
   this.handle('hitbybullet', _.bind(this.damage, this))
   this.on('collided', this.onCollided, this)
   this.on('tick', this.centipedeTick, this)
@@ -90,7 +90,7 @@ module.exports = Entity.Define(function(id, data) {
   },
   grow: function() {
     if(this.segments.length === this.maxSegments) return
-    var segment = this.game.spawnEntity(CentipedeSegment, {
+    var segment = this.scene.spawnEntity(CentipedeSegment, {
       x: this.x,
       y: this.y,
       head: this,

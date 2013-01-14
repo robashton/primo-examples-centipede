@@ -30,11 +30,11 @@ Trailer.prototype = {
     this.head.damage()
   },
   onKilled: function() {
-    this.entity.game.spawnEntity( DeadSegment, { x: this.entity.x, y: this.entity.y } )
+    this.entity.scene.spawnEntity( DeadSegment, { x: this.entity.x, y: this.entity.y } )
     if(Math.random() < 0.3) {
       var self = this
       setTimeout(function() {
-          self.entity.game.spawnEntity( Rock, { x: self.entity.x, y: self.entity.y } )
+          self.entity.scene.spawnEntity( Rock, { x: self.entity.x, y: self.entity.y } )
       }, 1000)
     }
   }

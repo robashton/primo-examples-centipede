@@ -11,10 +11,10 @@ module.exports = Entity.Define(function(id, data) {
     this.x = 0
     this.y = 232
     this.height = 8
-    this.game.on('level-changed', this.onLevelChanged, this)
-    this.game.on('flower-eaten', this.onFlowerEaten, this)
-    this.game.on('rock-destroyed', this.onRockDestroyed, this)
-    this.game.on('player-damaged', this.onPlayerDamaged, this)
+    this.scene.on('level-changed', this.onLevelChanged, this)
+    this.scene.on('flower-eaten', this.onFlowerEaten, this)
+    this.scene.on('rock-destroyed', this.onRockDestroyed, this)
+    this.scene.on('player-damaged', this.onPlayerDamaged, this)
     this.text = this.attach(new Text(this, 'Score: 0'))
   }, {
   getStats: function() {
