@@ -6,22 +6,26 @@ var RigidBody = require('primo-core/lib/components/rigidbody')
 var CentipedeSegment = require('./centipedesegment')
 var Flower = require('./flower')
 
-var Head = function(entity) {
-  this.entity = entity
-  this.game = entity.game
+module.exports = Entity.Define(function(id, data) {
+  this.width = 8
+  this.height = 8
+  this.attach(new RigidBody(this, { group: 'centipede'  }))
+  this.attach(new Animation(this, 'media/centipede.png', 8, 8))
+    .define( 'walkleft', 0.1, [0, 1], { flipx: true})
+    .define( 'walkright', 0.1, [0, 1])
+    .define( 'walkdown', 0.1, [2, 3])
+    .define( 'walkup', 0.1, [2,3], { flipy: true})
   this.maxSegments = 20
   this.segments = []
   this.history = []
   this.speed = 30,
   this.direction = ''
   this.addInitialSegments()
-  this.input = this.entity.game.input
-  this.entity.on('collided', this.onCollided, this)
-  this.entity.game.on('level-changed', this.onLevelChanged, this)
-  this.entity.handle('hitbybullet', _.bind(this.damage, this))
-}
-
-Head.prototype = {
+  this.input = this.game.input
+  this.on('collided', this.onCollided, this)
+  this.game.on('level-changed', this.onLevelChanged, this)
+  this.handle('hitbybullet', _.bind(this.damage, this))
+}, {
   tick: function() {
     this.updateHistory()
     this.checkBounds()
@@ -35,15 +39,15 @@ Head.prototype = {
       this.moveDown()
   },
   updateHistory: function() {
-    this.history[this.history.length-1].endx = this.entity.x
-    this.history[this.history.length-1].endy = this.entity.y
+    this.history[this.history.length-1].endx = this.x
+    this.history[this.history.length-1].endy = this.y
   },
   pushHistory: function() {
     this.history.push({
-      x: this.entity.x,
-      y: this.entity.y,
-      endx: this.entity.x,
-      endy: this.entity.y,
+      x: this.x,
+      y: this.y,
+      endx: this.x,
+      endy: this.y,
       direction: this.direction
     })
   },
@@ -67,26 +71,26 @@ Head.prototype = {
   changeDirection: function(direction, x, y) {
     if(this.direction === direction) return
     this.direction = direction
-    this.entity.velx = x
-    this.entity.vely = y
+    this.velx = x
+    this.vely = y
     this.pushHistory()
-    this.entity.dispatch('set-animation', 'walk' + this.direction)
+    this.dispatch('set-animation', 'walk' + this.direction)
   },
   damage: function() {
     if(this.segments.length === 0) {
-      this.entity.raise('player-died')
-      this.entity.kill()
+      this.raise('player-died')
+      this.kill()
       return
     }
-    this.entity.raise('player-damaged')
+    this.raise('player-damaged')
     var segment = this.segments.pop()
     segment.kill()
   },
   grow: function() {
     if(this.segments.length === this.maxSegments) return
-    var segment = this.entity.game.spawnEntity(CentipedeSegment, {
-      x: this.entity.x,
-      y: this.entity.y,
+    var segment = this.game.spawnEntity(CentipedeSegment, {
+      x: this.x,
+      y: this.y,
       head: this,
       index: this.segments.length+1
     })
@@ -122,17 +126,17 @@ Head.prototype = {
     }
   },
   checkBounds: function() {
-    if(this.entity.x < 0)
+    if(this.x < 0)
       this.moveRight()
-    if(this.entity.x > 312)
+    if(this.x > 312)
       this.moveLeft()
-    if(this.entity.y < 0)
+    if(this.y < 0)
       this.moveDown()
-    if(this.entity.y > 200)
+    if(this.y > 200)
       this.moveUp()
   },
   onLevelChanged: function(level) {
-    this.speed = 50 + (level * 10)
+    this.speed = 50 + (level * 5)
     if(this.direction === '')
       this.moveRight()
   },
@@ -140,20 +144,8 @@ Head.prototype = {
     if(other instanceof Flower) {
       other.kill()
       this.grow()
-      this.entity.raise('flower-eaten', other)
+      this.raise('flower-eaten', other)
     }
   }
-}
-
-module.exports = Entity.Define(function(id, data) {
-  this.width = 8
-  this.height = 8
-  this.attach(new RigidBody(this, { group: 'centipede'  }))
-  this.attach(new Animation(this, 'media/centipede.png', 8, 8))
-    .define( 'walkleft', 0.1, [0, 1], { flipx: true})
-    .define( 'walkright', 0.1, [0, 1])
-    .define( 'walkdown', 0.1, [2, 3])
-    .define( 'walkup', 0.1, [2,3], { flipy: true})
-  this.attach(new Head(this))
 })
 
