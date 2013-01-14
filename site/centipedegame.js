@@ -19,8 +19,27 @@ var CentipedeGame = function(game) {
   this.game.input.bind(this.game.input.RIGHT_ARROW, "right")
   this.game.input.bind(this.game.input.DOWN_ARROW, "down")
   this.game.input.bind(this.game.input.UP_ARROW, "up")
+  this.hookTouchInput()
 }
 CentipedeGame.prototype = {
+  hookTouchInput: function() {
+    var self = this
+    $('#game').touchwipe({
+       wipeLeft: function(e) {
+        self.head.moveLeft()
+       },
+       wipeUp: function() {
+        self.head.moveDown()
+       },
+       wipeDown: function() {
+        self.head.moveUp()
+       },
+       wipeRight: function() {
+        self.head.moveRight()
+      },
+      preventDefaultEvents: true
+    })
+  },
   restart: function() {
     this.game.reset()
     this.start()
@@ -29,6 +48,7 @@ CentipedeGame.prototype = {
     for(var i = 0; i < 10 ; i++) 
       this.spawnRock(Math.random() * 270 + 25, Math.random() * 180 + 30)
     var head = this.game.scene.spawnEntity(CentipedeHead, { x: 0, y: 0 })
+    this.head = head
     this.scene.spawnEntity(DefenceUnit, { x: 0, y: 218, head: head })
     this.messaging = this.scene.spawnEntity(Messaging)
     this.scorekeeper = this.scene.spawnEntity(ScoreKeeper)
