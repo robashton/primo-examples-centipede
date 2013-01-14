@@ -35,12 +35,13 @@ var $start = $('#start')
     $start.hide()
     $game.show()
     $gameover.hide()
+    game.restart()
     game.on('game-over', showGameOver)
   }
 
   function startGame() {
     var runner = new Runner('canvas')
-    var game = new CentipedeGame(runner)
+    game = new CentipedeGame(runner)
     runner.on('init', function() {
       game.start()
     })

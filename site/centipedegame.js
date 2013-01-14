@@ -23,7 +23,7 @@ var CentipedeGame = function(game) {
 }
 CentipedeGame.prototype = {
   restart: function() {
-    this.game.clear()
+    this.game.reset()
     this.start()
   },
   start: function() {
