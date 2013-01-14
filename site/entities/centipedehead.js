@@ -1,8 +1,8 @@
 var _ = require('underscore')
-var Entity = require('primo-core/lib/entity')
-var Animation = require('primo-core/lib/components/animation')
-var RigidBody = require('primo-core/lib/components/rigidbody')
-var BoundsCorrection = require('primo-core/lib/components/boundscorrection')
+var Entity = require('primo/lib/entity')
+var Animation = require('primo/lib/components/animation')
+var RigidBody = require('primo/lib/components/rigidbody')
+var BoundsCorrection = require('primo/lib/components/boundscorrection')
 
 var CentipedeSegment = require('./centipedesegment')
 var Flower = require('./flower')

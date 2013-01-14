@@ -1,6 +1,6 @@
-var Entity = require('primo-core/lib/entity')
-var Animation = require('primo-core/lib/components/animation')
-var RigidBody = require('primo-core/lib/components/rigidbody')
+var Entity = require('primo/lib/entity')
+var Animation = require('primo/lib/components/animation')
+var RigidBody = require('primo/lib/components/rigidbody')
 
 var Shrinker = require('../components/shrinker')
 

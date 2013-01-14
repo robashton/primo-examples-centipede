@@ -1,4 +1,4 @@
-var Entity = require('primo-core/lib/entity')
+var Entity = require('primo/lib/entity')
 var FloatingText = require('./floatingtext')
 
 module.exports = Entity.Define(function(id, data) {

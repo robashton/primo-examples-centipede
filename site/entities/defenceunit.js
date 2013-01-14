@@ -1,5 +1,5 @@
-var Entity = require('primo-core/lib/entity')
-var Animation = require('primo-core/lib/components/animation')
+var Entity = require('primo/lib/entity')
+var Animation = require('primo/lib/components/animation')
 var Bullet = require('./bullet')
 
 var DefenceUnit = function(entity, target) {

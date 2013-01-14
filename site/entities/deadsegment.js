@@ -1,5 +1,5 @@
-var Entity = require('primo-core/lib/entity')
-var Animation = require('primo-core/lib/components/animation')
+var Entity = require('primo/lib/entity')
+var Animation = require('primo/lib/components/animation')
 var TimedRemoval = require('../components/timedremoval')
 
 module.exports = Entity.Define(function(id, data) {

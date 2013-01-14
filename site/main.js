@@ -1,4 +1,4 @@
-var Primo = require('primo-core')
+var Primo = require('primo')
 var CentipedeGame = require('./centipedegame')
 
 var $start = $('#start')

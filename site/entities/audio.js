@@ -1,6 +1,6 @@
-var Entity = require('primo-core/lib/entity')
+var Primo = require('primo')
 
-module.exports = Entity.Define(function(id, data) {
+module.exports = Primo.DefineEntity(function(id, data) {
     
   var hurt = this.game.resources.sound('media/hurt')
   var fire = this.game.resources.sound('media/fire')

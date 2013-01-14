@@ -1,5 +1,5 @@
-var Entity = require('primo-core/lib/entity')
-var Text = require('primo-core/lib/components/text')
+var Entity = require('primo/lib/entity')
+var Text = require('primo/lib/components/text')
 
 module.exports = Entity.Define(function(id, data) {
     this.score = 0
