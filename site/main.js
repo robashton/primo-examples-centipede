@@ -1,6 +1,7 @@
 var Primo = require('primo')
 var CentipedeGame = require('./centipedegame')
 
+
 var $start = $('#start')
   , $game = $('#game')
   , $gameover = $('#gameover')
@@ -40,6 +41,11 @@ var $start = $('#start')
   }
 
   function startGame() {
+    // Resize the canvas?
+    var canvas = document.getElementById('canvas')
+    canvas.width = $game.width() //canvas.parentNode.clientWidth
+    canvas.height = $game.height() //canvas.parentNode.clientHeight
+
     var runner = Primo.Create('canvas')
     game = new CentipedeGame(runner)
     runner.on('init', function() {
@@ -48,6 +54,8 @@ var $start = $('#start')
     runner.start()
     $start.hide()
     $game.show()
+    
+
     $gameover.hide()
     game.on('game-over', showGameOver)
   }
