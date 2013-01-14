@@ -2,6 +2,7 @@ var _ = require('underscore')
 var Entity = require('primo-core/lib/entity')
 var Animation = require('primo-core/lib/components/animation')
 var RigidBody = require('primo-core/lib/components/rigidbody')
+var BoundsCorrection = require('primo-core/lib/components/boundscorrection')
 
 var CentipedeSegment = require('./centipedesegment')
 var Flower = require('./flower')
@@ -15,6 +16,7 @@ module.exports = Entity.Define(function(id, data) {
     .define( 'walkright', 0.1, [0, 1])
     .define( 'walkdown', 0.1, [2, 3])
     .define( 'walkup', 0.1, [2,3], { flipy: true})
+  this.attach(new BoundsCorrection(this, 0, 0, 312, 200))
   this.maxSegments = 20
   this.segments = []
   this.history = []
@@ -22,13 +24,13 @@ module.exports = Entity.Define(function(id, data) {
   this.direction = ''
   this.addInitialSegments()
   this.input = this.game.input
-  this.on('collided', this.onCollided, this)
   this.game.on('level-changed', this.onLevelChanged, this)
   this.handle('hitbybullet', _.bind(this.damage, this))
+  this.on('collided', this.onCollided, this)
+  this.on('tick', this.centipedeTick, this)
 }, {
-  tick: function() {
+  centipedeTick: function() {
     this.updateHistory()
-    this.checkBounds()
     if(this.input.active('left'))
       this.moveLeft()
     if(this.input.active('right'))
@@ -124,16 +126,6 @@ module.exports = Entity.Define(function(id, data) {
       else
         return this.tryGetPositionFromHistory(index-1, desired, total)
     }
-  },
-  checkBounds: function() {
-    if(this.x < 0)
-      this.moveRight()
-    if(this.x > 312)
-      this.moveLeft()
-    if(this.y < 0)
-      this.moveDown()
-    if(this.y > 200)
-      this.moveUp()
   },
   onLevelChanged: function(level) {
     this.speed = 50 + (level * 5)
