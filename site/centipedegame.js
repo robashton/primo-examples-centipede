@@ -6,6 +6,7 @@ var Eventable = require('primo-events')
   , DefenceUnit = require('./entities/defenceunit')
   , Messaging = require('./entities/messaging')
   , ScoreKeeper = require('./entities/scorekeeper')
+  , SoundWatcher = require('./entities/audio')
 
 var CentipedeGame = function(game) {
   Eventable.call(this)
@@ -32,6 +33,7 @@ CentipedeGame.prototype = {
     this.game.spawnEntity(DefenceUnit, { x: 0, y: 218, head: head })
     this.messaging = this.game.spawnEntity(Messaging)
     this.scorekeeper = this.game.spawnEntity(ScoreKeeper)
+    this.sounds = this.game.spawnEntity(SoundWatcher)
     this.startLevel(1)
   },
   startLevel: function(level) {
