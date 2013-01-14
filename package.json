@@ -1,9 +1,12 @@
 {
-  "name" : "primojs",
+  "name": "centipede2013",
   "version": "1.0.0",
   "dependencies": {
     "send": "~0.1.0",
     "express": "~3.0.3",
-    "underscore": "~1.4.2"
+    "underscore": "~1.4.3",
+    "swallow": "~0.3.0",
+    "primo-events": "~1.0.0",
+    "primo-audio": "0.0.6"
   }
 }
