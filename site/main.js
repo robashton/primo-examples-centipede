@@ -44,7 +44,7 @@ var $start = $('#start')
     // Resize the canvas?
     var canvas = document.getElementById('canvas')
     canvas.width = $game.width() //canvas.parentNode.clientWidth
-    canvas.height = $game.height() //canvas.parentNode.clientHeight
+    canvas.height = $game.width() * 3/4 //$game.height() //canvas.parentNode.clientHeight
 
     var runner = Primo.Create('canvas')
     game = new CentipedeGame(runner)
