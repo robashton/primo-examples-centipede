@@ -1,7 +1,7 @@
-var Entity = require('primo/lib/entity')
+var Primo = require('primo')
 var FloatingText = require('./floatingtext')
 
-module.exports = Entity.Define(function(id, data) {
+module.exports = Primo.DefineEntity(function(id, data) {
   this.messages = []
   var scene = this.scene
   this.scene.on('level-changed', function(level) {

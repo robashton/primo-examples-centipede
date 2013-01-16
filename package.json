@@ -7,7 +7,12 @@
     "underscore": "~1.4.3"
   },
   "devDependencies": {
-    "primo": ""
+    "primo": "",
+    "primo-animation": "",
+    "primo-text": "",
+    "primo-boundary": "",
+    "primo-rigidbody": "",
+    "primo-events": ""
   },
   "engines": {
     "node": "0.8.x",

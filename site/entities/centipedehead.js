@@ -1,13 +1,14 @@
 var _ = require('underscore')
-var Entity = require('primo/lib/entity')
-var Animation = require('primo/lib/components/animation')
-var RigidBody = require('primo/lib/components/rigidbody')
-var BoundsCorrection = require('primo/lib/components/boundscorrection')
+
+var Primo = require('primo')
+var Animation = require('primo-animation')
+var RigidBody = require('primo-rigidbody')
+var BoundsCorrection = require('primo-boundary')
 
 var CentipedeSegment = require('./centipedesegment')
 var Flower = require('./flower')
 
-module.exports = Entity.Define(function(id, data) {
+module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 8
   this.height = 8
   this.attach(new RigidBody(this, { group: 'centipede'  }))

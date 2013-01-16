@@ -1,8 +1,8 @@
-var Entity = require('primo/lib/entity')
-var Animation = require('primo/lib/components/animation')
-var RigidBody = require('primo/lib/components/rigidbody')
+var Primo = require('primo')
+var Animation = require('primo-animation')
+var RigidBody = require('primo-rigidbody')
 
-module.exports = Entity.Define(function(id, data) {
+module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 6
   this.height = 6
   this.attach(new RigidBody(this, { weight: 0 }))

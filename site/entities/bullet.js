@@ -1,9 +1,10 @@
-var Entity = require('primo/lib/entity')
-var Animation = require('primo/lib/components/animation')
-var Bullet = require('primo/lib/components/bullet')
+var Primo = require('primo')
+var Animation = require('primo-animation')
 var util = require('primo/lib/commons')
 
-module.exports = Entity.Define(function(id, data){
+var Bullet = require('../components/bullet')
+
+module.exports = Primo.DefineEntity(function(id, data){
   this.width = 4
   this.height = 4
   this.attach(new Bullet(this))

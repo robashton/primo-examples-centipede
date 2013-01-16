@@ -1,8 +1,8 @@
-var Entity = require('primo/lib/entity')
-var Animation = require('primo/lib/components/animation')
+var Primo = require('primo')
+var Animation = require('primo-animation')
 var TimedRemoval = require('../components/timedremoval')
 
-module.exports = Entity.Define(function(id, data) {
+module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 8
   this.height = 8
   this.attach(new TimedRemoval(this, 1))

@@ -1,7 +1,7 @@
-var Entity = require('primo/lib/entity')
-var Text = require('primo/lib/components/text')
+var Primo = require('primo')
+var Text = require('primo-text')
 
-module.exports = Entity.Define(function(id, data) {
+module.exports = Primo.DefineEntity(function(id, data) {
     this.score = 0
     this.totalrocks = 0
     this.totalflowers = 0

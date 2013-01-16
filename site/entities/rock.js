@@ -1,10 +1,10 @@
-var Entity = require('primo/lib/entity')
-var Animation = require('primo/lib/components/animation')
-var RigidBody = require('primo/lib/components/rigidbody')
+var Primo = require('primo')
+var Animation = require('primo-animation')
+var RigidBody = require('primo-rigidbody')
 
 var Shrinker = require('../components/shrinker')
 
-module.exports = Entity.Define(function() {
+module.exports = Primo.DefineEntity(function() {
   this.width = 12
   this.height = 12
   this.rockType = 0
