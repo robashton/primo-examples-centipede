@@ -91,7 +91,7 @@ module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 8
   this.height = 8
   this.attach(new DefenceUnit(this, data.head))
-  this.attach(new Animation(this, 'media/defenceunit.png', 8, 8))
+  this.attach(new Animation(this, 'media/defenceunit.png'))
     .define('idle', 10, [0])
 })
 

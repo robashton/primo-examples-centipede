@@ -1,0 +1,40 @@
+centipede2013@1.0.0 /home/robashton/src/primo/examples-centipede
+├─┬ express@3.0.6
+│ ├── buffer-crc32@0.1.1
+│ ├── commander@0.6.1
+│ ├─┬ connect@2.7.2
+│ │ ├── bytes@0.1.0
+│ │ ├── formidable@1.0.11
+│ │ ├── pause@0.0.1
+│ │ └── qs@0.5.1
+│ ├── cookie@0.0.5
+│ ├── cookie-signature@0.0.1
+│ ├── debug@0.7.0
+│ ├── fresh@0.1.0
+│ ├── methods@0.0.1
+│ ├── mkdirp@0.3.3
+│ └── range-parser@0.0.4
+├─┬ primo@0.1.1
+│ ├── primo-audio@0.0.6
+│ ├── primo-camera@0.0.0
+│ ├── primo-canvas@0.0.0
+│ ├── primo-counter@0.0.0
+│ ├── primo-events@1.0.2
+│ ├── primo-spritemap@0.0.0
+│ └── primo-timer@0.0.0
+├─┬ primo-animation@0.0.1
+│ └─┬ primo-spritemap@0.0.1
+│   ├── primo-canvas@0.0.0
+│   └── primo-events@1.0.2
+├── primo-boundary@0.0.0
+├── primo-events@1.0.2
+├─┬ primo-rigidbody@0.0.2
+│ └── primo-utils@0.0.0
+├── primo-text@0.0.0
+├─┬ send@0.1.0
+│ ├── debug@0.7.0
+│ ├── fresh@0.1.0
+│ ├── mime@1.2.6
+│ └── range-parser@0.0.4
+└── underscore@1.4.3
+

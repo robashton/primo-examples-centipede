@@ -1,6 +1,6 @@
 var Primo = require('primo')
 var Animation = require('primo-animation')
-var RigidBody = require('primo-rigidbody')
+var RigidBody = require('primo-physics').RigidBody
 
 var Shrinker = require('../components/shrinker')
 
@@ -10,7 +10,7 @@ module.exports = Primo.DefineEntity(function() {
   this.rockType = 0
   this.attach(new RigidBody(this, { weight: Infinity, group: 'rock' }))
   this.attach(new Shrinker(this, [12, 8, 4]))
-  this.attach(new Animation(this, 'media/rock.png', 12, 12))
+  this.attach(new Animation(this, 'media/rock.png', 3, 1))
     .define( 'idle', 10, [0])
   this.on('killed', function() { 
     this.raise('rock-destroyed', this)

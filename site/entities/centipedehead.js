@@ -2,7 +2,7 @@ var _ = require('underscore')
 
 var Primo = require('primo')
 var Animation = require('primo-animation')
-var RigidBody = require('primo-rigidbody')
+var RigidBody = require('primo-physics').RigidBody
 var BoundsCorrection = require('primo-boundary')
 
 var CentipedeSegment = require('./centipedesegment')
@@ -12,7 +12,7 @@ module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 8
   this.height = 8
   this.attach(new RigidBody(this, { group: 'centipede'  }))
-  this.attach(new Animation(this, 'media/centipede.png', 8, 8))
+  this.attach(new Animation(this, 'media/centipede.png', 5, 5))
     .define( 'walkleft', 0.1, [0, 1], { flipx: true})
     .define( 'walkright', 0.1, [0, 1])
     .define( 'walkdown', 0.1, [2, 3])

@@ -449,7 +449,7 @@ module.exports = {
 });
 
 require.define("/node_modules/primo/lib/entity.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore') 
-var util = require('./commons')
+var util = require('primo-utils')
 var Eventable = require('primo-events')
 
 var Entity = function(id,data, scene) {
@@ -458,13 +458,15 @@ var Entity = function(id,data, scene) {
   data = data || {}
   this.x = util.valueOrDefault(data.x, 0)
   this.y = util.valueOrDefault(data.y, 0)
+  this.rotation = 0
   this.lastx = this.x
   this.lasty = this.y
   this.velx = util.valueOrDefault(data.velx, 0)
   this.vely = util.valueOrDefault(data.vely, 0)
+  this.rotvel = util.valueOrDefault(data.rotvel, 0)
   this.width = util.valueOrDefault(data.width, 0)
   this.height = util.valueOrDefault(data.height, 0)
-  this.collideable = false
+  this.gravible = false
   this.scene = scene
   this.game = scene.game
   this.components = []
@@ -480,6 +482,7 @@ Entity.prototype = {
   tick: function(frameTime) {
     this.raise('tick', frameTime)
     _(this.components).each(function(c) { if(c.tick) c.tick(frameTime) })
+    this.checkAgainstLevel()
   },
   render: function(context) {
     _(this.components).each(function(c) { if(c.render) c.render(context) })
@@ -494,16 +497,19 @@ Entity.prototype = {
     else
       handler(data)
   },
-  updatePhysics: function(frameTime) {
+  applyPhysics: function(frameTime) {
+    this.scene.applyGravityTo(this)
     this.lastx = this.x
     this.lasty = this.y
     this.x += this.velx * frameTime
     this.y += this.vely * frameTime
+    this.rotation += this.rotvel * frameTime
+    this.scene.applyGravityTo(this)
   },
-  notifyOfCollisionWith: function(other) {
-    this.raise('collided', other)
-  },
-  checkAgainstLevel: function(level) {
+  checkAgainstLevel: function() {
+    if(!this.scene.level) return
+    var level = this.scene.level
+
     var res = level.checkQuadMovement(
       this.x, this.y, this.width, this.height, 
       this.velx * this.frameTime, this.vely * this.frameTime)
@@ -1778,7 +1784,10 @@ require.define("/node_modules/underscore/underscore.js",function(require,module,
 
 });
 
-require.define("/node_modules/primo/lib/commons.js",function(require,module,exports,__dirname,__filename,process,global){module.exports = {
+require.define("/node_modules/primo/node_modules/primo-utils/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"commons.js"}
+});
+
+require.define("/node_modules/primo/node_modules/primo-utils/commons.js",function(require,module,exports,__dirname,__filename,process,global){module.exports = {
   valueOrDefault: function(value, def) {
     return typeof value !== 'undefined' ? 
          value : 
@@ -1788,10 +1797,10 @@ require.define("/node_modules/primo/lib/commons.js",function(require,module,expo
 
 });
 
-require.define("/node_modules/primo/node_modules/primo-events/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"eventable.js"}
+require.define("/node_modules/primo-events/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"eventable.js"}
 });
 
-require.define("/node_modules/primo/node_modules/primo-events/eventable.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
+require.define("/node_modules/primo-events/eventable.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
 var EventContainer = require('./eventcontainer');
   
 var Eventable = function() {
@@ -1867,7 +1876,7 @@ module.exports = Eventable;
 
 });
 
-require.define("/node_modules/primo/node_modules/primo-events/eventcontainer.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore');
+require.define("/node_modules/primo-events/eventcontainer.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore');
 
 var EventContainer = function(defaultContext) {
   this.handlers = [];
@@ -1913,6 +1922,8 @@ var Game = function(targetId) {
   Eventable.call(this)
   this.targetid = targetId
   this.desiredFps = 30
+  this.cellsize = 32
+  this.gravity = function() {}
   this.frameTime = 1 / this.desiredFps
   this.tickTimer = new Timer(this.desiredFps)
   this.tick = _.bind(this.tick, this)
@@ -1936,8 +1947,9 @@ Game.prototype = {
     this.render()
   },
   tick: function() {
-    this.raise('tick') 
+    this.raise('PreTick', this.frameTime) 
     this.scene.tick(this.frameTime)
+    this.raise('PostTick', this.frameTime) 
   },
   render: function() {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -1983,9 +1995,7 @@ module.exports = Timer
 require.define("/node_modules/primo/lib/scene.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
 var Eventable = require('primo-events')
 var Camera = require('primo-camera')
-
 var Level = require('./level')
-var CollisionGrid = require('./collisiongrid')
 
 var Scene = function(game) {
   Eventable.call(this)
@@ -1996,22 +2006,24 @@ var Scene = function(game) {
   this.context = this.game.context
   this.camera = new Camera(this.context)
   this.camera.makeTopLeftWorldCoords(0,0)
+  this.gravityObject = {x: 0, y: 0}
 }
 
 Scene.prototype = {
   tick: function(frameTime) {
-    var grid = new CollisionGrid(32) 
     for(var i = 0; i < this.entities.length; i++) { 
       var entity = this.entities[i] 
       entity.tick(frameTime)
-      if(entity.collideable) {
-        if(this.level)
-          entity.checkAgainstLevel(this.level, frameTime)
-        grid.addEntity(entity)
-      }
-      entity.updatePhysics(frameTime)
+      entity.applyPhysics(frameTime)
     }
-    grid.performCollisionChecks(frameTime)
+  },
+  applyGravityTo: function(entity) {
+    if(!entity.gravible) return
+    this.gravityObject.x = 0
+    this.gravityObject.y = 0
+    this.game.gravity(entity, this.gravityObject)
+    entity.velx += this.gravityObject.x
+    entity.vely += this.gravityObject.y
   },
   render: function(context) {
     this.camera.begin()
@@ -2050,6 +2062,11 @@ Scene.prototype = {
     this.entities.push(entity)
     entity.addProxy(this)
     return entity
+  },
+  forEachEntity: function(cb) {
+    for(var i = 0; i < this.entities.length; i++) {
+      cb(this.entities[i])
+    }
   },
   removeEntity: function(entity) {
     entity.removeProxy(this)
@@ -2400,13 +2417,13 @@ require.define("/node_modules/primo/node_modules/primo-spritemap/spritemap.js",f
 var MemoryCanvas = require('primo-canvas')
 var Eventable = require('primo-events')
 
-var SpriteMap = function(texture, spritewidth, spriteheight) {
+var SpriteMap = function(texture, tilecountwidth, tilecountheight) {
   Eventable.call(this)
-  this.spritewidth = spritewidth
-  this.spriteheight = spriteheight
-  this.tilecount = 0
-  this.tilecountwidth = 0
-  this.tilecountheight = 0
+  this.tilewidth = 0
+  this.tileheight = 0
+  this.tilecountwidth = tilecountwidth || 1
+  this.tilecountheight = tilecountheight || 1
+  this.tilecount = tilecountwidth * tilecountheight 
   this.collisionmapsize = 0
   this.collisionMaps = []
   this.texture = texture
@@ -2415,7 +2432,7 @@ var SpriteMap = function(texture, spritewidth, spriteheight) {
 }
 
 SpriteMap.prototype = {
-  drawTo: function(context, index,  x, y, width, height, flipx, flipy) {
+  drawTo: function(context, index,  x, y, width, height, flipx, flipy, rotation) {
     if(!this.loaded) return
 
     var img = this.texture.get()
@@ -2423,14 +2440,28 @@ SpriteMap.prototype = {
     var rownumber = Math.floor(index / this.tilecountwidth)
     var columnnumber = index % this.tilecountwidth
 
-    var sx = columnnumber * this.spritewidth
-    var sy = rownumber * this.spriteheight
+    var sx = columnnumber * this.tilewidth
+    var sy = rownumber * this.tileheight
 
     var scalex = flipx ? -1 : 1
     var scaley = flipy ? -1 : 1
+    var contextSaved = false
+
+    if(rotation) {
+      if(!contextSaved) {
+        contextSaved = true
+        context.save()
+      }
+      context.translate(x + width/2.0, y + height/2.0)
+      context.rotate(rotation)
+      context.translate(-(x + width/2.0),-(y + height/2.0))
+    }
 
     if(flipx || flipy) {
-      context.save()
+      if(!contextSaved) {
+        contextSaved = true
+        context.save()
+      }
       context.scale(scalex, scaley)
       x *= scalex
       y *= scaley
@@ -2438,13 +2469,15 @@ SpriteMap.prototype = {
         x -= width
       if(flipy)
         y -= height
-    }
+      contextSaved = true
+    } 
+
 
     context.drawImage(img, 
-      sx, sy, this.spritewidth, this.spriteheight,
-      x, y , width || this.spritewidth, height || this.spriteheight)
+      sx, sy, this.tilewidth, this.tileheight,
+      x, y , width || this.tilewidth, height || this.tileheight)
 
-    if(flipx || flipy) 
+    if(contextSaved) 
       context.restore()
   },
   generateCollisionMaps: function(width, height) {
@@ -2479,9 +2512,8 @@ SpriteMap.prototype = {
   onLoaded: function() {
     this.loaded = true
     var img = this.texture.get()
-    this.tilecountwidth = img.width / this.spritewidth
-    this.tilecountheight = img.height / this.spriteheight
-    this.tilecount = this.tilecountwidth * this.tilecountheight
+    this.tilewidth = img.width / this.tilecountwidth
+    this.tileheight = img.height / this.tilecountheight
     this.raise('loaded')
   }
 }
@@ -2607,115 +2639,6 @@ Layer.prototype = {
   }
 }
 module.exports = Layer
-
-});
-
-require.define("/node_modules/primo/lib/collisiongrid.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
-
-var Bucket = function(id) {
-  this.id = id
-  this.entities = []
-}
-
-
-Bucket.prototype = {
-  add: function(entity) {
-    this.entities.push(entity)
-  },
-  count: function() {
-    return this.entities.length
-  },
-  get: function(i) {
-    return this.entities[i]
-  }
-}
-
-var RegisteredEntity = function(entity) {
-  this.id = entity.id
-  this.entity = entity
-  this.buckets = []
-}
-
-RegisteredEntity.prototype = {
-  addBucket: function(bucket) {
-    this.buckets.push(bucket)
-  },
-  fillArrayWithNearbyEntities: function(array) {
-    var added = {}
-    for(var i = 0 ; i < this.buckets.length; i++) {
-      var bucket = this.buckets[i]
-      for(var j = 0; j < bucket.count(); j++) {
-        var entity = bucket.get(j)
-        if(added[entity.id]) continue
-        if(entity.id === this.id) continue
-        added[entity.id] = true
-        array.push(entity)
-      }
-    }
-  },
-  collideWith: function(other) {
-    if(other.entity.x > this.entity.x + this.entity.width) return
-    if(other.entity.y > this.entity.y + this.entity.height) return
-    if(other.entity.x + other.entity.width < this.entity.x) return
-    if(other.entity.y + other.entity.height < this.entity.y) return
-
-    this.entity.notifyOfCollisionWith(other.entity)
-  }
-}
-
-var CollisionGrid = function(cellsize) {
-  this.cellsize = cellsize
-  this.entities = []
-  this.entityBuckets = {}
-  this.buckets = []
-}
-
-CollisionGrid.prototype = {
-  addEntity: function(entity) {
-    var registered = new RegisteredEntity(entity)
-    this.addToBucket(registered, entity.x, entity.y)
-    this.addToBucket(registered, entity.x + entity.width, entity.y)
-    this.addToBucket(registered, entity.x, entity.y + entity.height)
-    this.addToBucket(registered, entity.x, entity.y)
-    this.entities.push(registered)
-  },
-  addToBucket: function(entity, x, y) {
-    var bucket = this.bucketFor(x,y)
-    if(!bucket) {
-      return
-    }
-    bucket.add(entity)
-    entity.addBucket(bucket)
-  },
-  bucketFor: function(x,y) {
-    x = Math.floor(x / this.cellsize)
-    y = Math.floor(y / this.cellsize)
-    var id = x + '-' + y
-    var bucket = this.buckets[id] 
-    if(!bucket) {
-      bucket = new Bucket(id)
-      this.buckets[id] = bucket
-    }
-    return bucket
-  },
-  performCollisionChecks: function() {
-    var total = 0
-    var entitiesToCheck = []
-    for(var i = 0; i < this.entities.length; i++) {
-      entitiesToCheck.length = 0
-      var registered = this.entities[i]
-      registered.fillArrayWithNearbyEntities(entitiesToCheck)
-      total += entitiesToCheck.length
-      for(var j = 0; j < entitiesToCheck.length; j++) {
-        var other = entitiesToCheck[j]
-        registered.collideWith(other)
-      }
-    }
-  }
-}
-
-module.exports = CollisionGrid
-
 
 });
 
@@ -2969,13 +2892,17 @@ Input.prototype = {
   },
   onKeyDown: function(e) {
     var alias = this.aliases[e.keyCode]
-    if(alias)
+    if(alias) {
       this.states[alias] = true
+      return false
+    }
   },
   onKeyUp: function(e) {
     var alias = this.aliases[e.keyCode]
-    if(alias)
+    if(alias) {
       this.states[alias] = false
+      return false
+    }
   },
   active: function(alias) {
     return !!this.states[alias]
@@ -2983,7 +2910,8 @@ Input.prototype = {
   LEFT_ARROW: 37,
   UP_ARROW: 38,
   RIGHT_ARROW: 39,
-  DOWN_ARROW: 40
+  DOWN_ARROW: 40,
+  LEFT_CTRL: 17
 }
 
 _.extend(Input.prototype, Eventable.prototype)
@@ -3090,127 +3018,15 @@ module.exports = CentipedeGame
 
 });
 
-require.define("/node_modules/primo-events/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"eventable.js"}
-});
-
-require.define("/node_modules/primo-events/eventable.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
-var EventContainer = require('./eventcontainer');
-  
-var Eventable = function() {
-  this.eventListeners = {};
-  this.eventDepth = 0;
-  this.proxies = []
-};
-
-Eventable.prototype = {
-  autoHook: function(container) {
-    for(var key in container) { 
-      if(key.indexOf('on') === 0) {
-        this.on(key.substr(2), container[key], container);
-      }   
-    }
-  },
-  autoUnhook: function(container) {
-    for(var key in container) { 
-      if(key.indexOf('on') === 0) {
-        this.off(key.substr(2), container[key], container);
-      }   
-    }
-  },
-  clearListeners: function() {
-    this.eventListeners = {};
-    this.eventDepth = 0;
-    this.proxies = []
-  },
-  once: function(eventName, callback, context) {
-    var self = this;
-    var wrappedCallback = function(data, sender) {
-      callback.call(this, data, sender);
-      self.off(eventName, wrappedCallback, context);
-    };
-    this.on(eventName, wrappedCallback, context);
-  },
-  
-  on: function(eventName, callback, context) {
-    this.eventContainerFor(eventName).add(callback, context);
-  },
-  
-  off: function(eventName, callback, context) {
-    this.eventContainerFor(eventName).remove(callback, context);
-  },
-  raise: function(eventName, data, sender) {
-    var container = this.eventListeners[eventName];
-
-    if(container)
-      container.raise(sender || this, data);
-
-    var proxies = this.proxies
-    for(var i = 0 ; i < proxies.length ; i++)
-      proxies[i].raise(eventName, data, sender || this)
-  },
-  addProxy: function(proxy) {
-    this.proxies.push(proxy)
-  },
-  removeProxy: function(proxy) {
-    this.proxies = _.without(this.proxies, proxy)
-  },
-  eventContainerFor: function(eventName) {
-    var container = this.eventListeners[eventName];
-    if(!container) {
-      container =  new EventContainer(this);
-      this.eventListeners[eventName] = container;
-    }
-    return container;
-  }
-};
-
-module.exports = Eventable;
-
-
-});
-
-require.define("/node_modules/primo-events/eventcontainer.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore');
-
-var EventContainer = function(defaultContext) {
-  this.handlers = [];
-  this.defaultContext = defaultContext;
-}; 
-
-EventContainer.prototype = {
-  raise: function(source, data) {
-   var handlerLength = this.handlers.length;
-   var handlers = this.handlers
-   for(var i = 0; i < handlerLength; i++) {
-      var handler = handlers[i];
-      handler.method.call(handler.context || this.defaultContext, data, source);   
-   }
-  },
-  add: function(method, context) {
-    this.handlers.push({
-      method: method,
-      context: context      
-    });
-  },
-  remove: function(method, context) {
-    this.handlers = _(this.handlers).filter(function(item) {
-      return item.method !== method || item.context !== context;
-    });
-  }
-};
-  
-module.exports = EventContainer;
-
-});
-
 require.define("/site/entities/flower.js",function(require,module,exports,__dirname,__filename,process,global){var Primo = require('primo')
 var Animation = require('primo-animation')
-var RigidBody = require('primo-rigidbody')
+var RigidBody = require('primo-physics').RigidBody
 
 module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 6
   this.height = 6
   this.attach(new RigidBody(this, { weight: 0 }))
-  this.attach(new Animation(this, 'media/flower.png', 6, 6 ))
+  this.attach(new Animation(this, 'media/flower.png', 5, 1 ))
     .define('idle', 0.5, [ 0, 1, 2, 3, 4 ])
 })
 
@@ -3222,15 +3038,16 @@ require.define("/node_modules/primo-animation/package.json",function(require,mod
 require.define("/node_modules/primo-animation/animation.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
 var SpriteMap = require('primo-spritemap')
 
-var Animation = function(entity, path, spritewidth, spriteheight) {
+var Animation = function(entity, path, tilecountwidth, tilecountheight) {
   this.entity = entity
   this.path = path
-  this.spritemap = entity.game.resources.spritemap(path, spritewidth, spriteheight)
+  this.spritemap = entity.game.resources.spritemap(path, tilecountwidth, tilecountheight)
   this.currentanimation = 'idle'
   this.current = 0
   this.totalFrameTime = 0
   this.animations = {}
   this.entity.handle('set-animation', _.bind(this.setAnimation, this))
+  this.define('idle', 1.0, [0])
 }
 
 Animation.prototype = {
@@ -3279,13 +3096,13 @@ require.define("/node_modules/primo-animation/node_modules/primo-spritemap/sprit
 var MemoryCanvas = require('primo-canvas')
 var Eventable = require('primo-events')
 
-var SpriteMap = function(texture, spritewidth, spriteheight) {
+var SpriteMap = function(texture, tilecountwidth, tilecountheight) {
   Eventable.call(this)
-  this.spritewidth = spritewidth
-  this.spriteheight = spriteheight
-  this.tilecount = 0
-  this.tilecountwidth = 0
-  this.tilecountheight = 0
+  this.tilewidth = 0
+  this.tileheight = 0
+  this.tilecountwidth = tilecountwidth || 1
+  this.tilecountheight = tilecountheight || 1
+  this.tilecount = tilecountwidth * tilecountheight 
   this.collisionmapsize = 0
   this.collisionMaps = []
   this.texture = texture
@@ -3302,8 +3119,8 @@ SpriteMap.prototype = {
     var rownumber = Math.floor(index / this.tilecountwidth)
     var columnnumber = index % this.tilecountwidth
 
-    var sx = columnnumber * this.spritewidth
-    var sy = rownumber * this.spriteheight
+    var sx = columnnumber * this.tilewidth
+    var sy = rownumber * this.tileheight
 
     var scalex = flipx ? -1 : 1
     var scaley = flipy ? -1 : 1
@@ -3336,8 +3153,8 @@ SpriteMap.prototype = {
 
 
     context.drawImage(img, 
-      sx, sy, this.spritewidth, this.spriteheight,
-      x, y , width || this.spritewidth, height || this.spriteheight)
+      sx, sy, this.tilewidth, this.tileheight,
+      x, y , width || this.tilewidth, height || this.tileheight)
 
     if(contextSaved) 
       context.restore()
@@ -3374,9 +3191,8 @@ SpriteMap.prototype = {
   onLoaded: function() {
     this.loaded = true
     var img = this.texture.get()
-    this.tilecountwidth = img.width / this.spritewidth
-    this.tilecountheight = img.height / this.spriteheight
-    this.tilecount = this.tilecountwidth * this.tilecountheight
+    this.tilewidth = img.width / this.tilecountwidth
+    this.tileheight = img.height / this.tilecountheight
     this.raise('loaded')
   }
 }
@@ -3437,138 +3253,188 @@ module.exports = MemoryCanvas
 
 });
 
-require.define("/node_modules/primo-animation/node_modules/primo-spritemap/node_modules/primo-events/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"eventable.js"}
+require.define("/node_modules/primo-physics/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"physics.js"}
 });
 
-require.define("/node_modules/primo-animation/node_modules/primo-spritemap/node_modules/primo-events/eventable.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
-var EventContainer = require('./eventcontainer');
-  
-var Eventable = function() {
-  this.eventListeners = {};
-  this.eventDepth = 0;
-  this.proxies = []
-};
+require.define("/node_modules/primo-physics/physics.js",function(require,module,exports,__dirname,__filename,process,global){var CollisionGrid = require('./collisiongrid')
+var RigidBody = require('./rigidbody')
 
-Eventable.prototype = {
-  autoHook: function(container) {
-    for(var key in container) { 
-      if(key.indexOf('on') === 0) {
-        this.on(key.substr(2), container[key], container);
-      }   
-    }
+var physics = {
+  init: function(game) {
+    game.on('PostTick', function() {
+      var grid = null
+      grid = new CollisionGrid(game.cellsize)
+      game.scene.forEachEntity(function(entity) {
+        if(entity.physics)
+          grid.addEntity(entity)
+      })
+      grid.performCollisionChecks()
+    })
   },
-  autoUnhook: function(container) {
-    for(var key in container) { 
-      if(key.indexOf('on') === 0) {
-        this.off(key.substr(2), container[key], container);
-      }   
-    }
-  },
-  clearListeners: function() {
-    this.eventListeners = {};
-    this.eventDepth = 0;
-    this.proxies = []
-  },
-  once: function(eventName, callback, context) {
-    var self = this;
-    var wrappedCallback = function(data, sender) {
-      callback.call(this, data, sender);
-      self.off(eventName, wrappedCallback, context);
-    };
-    this.on(eventName, wrappedCallback, context);
-  },
-  
-  on: function(eventName, callback, context) {
-    this.eventContainerFor(eventName).add(callback, context);
-  },
-  
-  off: function(eventName, callback, context) {
-    this.eventContainerFor(eventName).remove(callback, context);
-  },
-  raise: function(eventName, data, sender) {
-    var container = this.eventListeners[eventName];
+  RigidBody: RigidBody
+}
 
-    if(container)
-      container.raise(sender || this, data);
+module.exports = physics
 
-    var proxies = this.proxies
-    for(var i = 0 ; i < proxies.length ; i++)
-      proxies[i].raise(eventName, data, sender || this)
+});
+
+require.define("/node_modules/primo-physics/collisiongrid.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
+
+// Note: Entities are expected to have an 'id', 'x', 'y', 'width', 'height'
+// This is an in-direct coupling to the rest of primo, will sleep on it
+
+var Bucket = function(id) {
+  this.id = id
+  this.entities = []
+}
+
+
+Bucket.prototype = {
+  add: function(entity) {
+    this.entities.push(entity)
   },
-  addProxy: function(proxy) {
-    this.proxies.push(proxy)
+  count: function() {
+    return this.entities.length
   },
-  removeProxy: function(proxy) {
-    this.proxies = _.without(this.proxies, proxy)
-  },
-  eventContainerFor: function(eventName) {
-    var container = this.eventListeners[eventName];
-    if(!container) {
-      container =  new EventContainer(this);
-      this.eventListeners[eventName] = container;
-    }
-    return container;
+  get: function(i) {
+    return this.entities[i]
   }
-};
+}
 
-module.exports = Eventable;
+var RegisteredEntity = function(entity) {
+  this.id = entity.id
+  this.entity = entity
+  this.buckets = []
+}
 
-
-});
-
-require.define("/node_modules/primo-animation/node_modules/primo-spritemap/node_modules/primo-events/eventcontainer.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore');
-
-var EventContainer = function(defaultContext) {
-  this.handlers = [];
-  this.defaultContext = defaultContext;
-}; 
-
-EventContainer.prototype = {
-  raise: function(source, data) {
-   var handlerLength = this.handlers.length;
-   var handlers = this.handlers
-   for(var i = 0; i < handlerLength; i++) {
-      var handler = handlers[i];
-      handler.method.call(handler.context || this.defaultContext, data, source);   
-   }
+RegisteredEntity.prototype = {
+  addBucket: function(bucket) {
+    this.buckets.push(bucket)
   },
-  add: function(method, context) {
-    this.handlers.push({
-      method: method,
-      context: context      
-    });
+  fillArrayWithNearbyEntities: function(array) {
+    var added = {}
+    for(var i = 0 ; i < this.buckets.length; i++) {
+      var bucket = this.buckets[i]
+      for(var j = 0; j < bucket.count(); j++) {
+        var entity = bucket.get(j)
+        if(added[entity.id]) continue
+        if(entity.id === this.id) continue
+        added[entity.id] = true
+        array.push(entity)
+      }
+    }
   },
-  remove: function(method, context) {
-    this.handlers = _(this.handlers).filter(function(item) {
-      return item.method !== method || item.context !== context;
-    });
+  collideWith: function(other) {
+    // Can probably get rid of this now we're all 'physics'
+    this.entity.dispatch('potentialcollision', other.entity)
+    other.entity.dispatch('potentialcollision', this.entity)
   }
-};
-  
-module.exports = EventContainer;
+}
+
+var CollisionGrid = function(cellsize) {
+  this.cellsize = cellsize
+  this.entities = []
+  this.entityBuckets = {}
+  this.buckets = []
+}
+
+CollisionGrid.prototype = {
+  addEntity: function(entity) {
+    var registered = new RegisteredEntity(entity)
+
+    for(var x = entity.x ; x <= entity.x + entity.width + this.cellsize ; x += this.cellsize) {
+      for(var y = entity.y ; y <= entity.y + entity.height + this.cellsize ; y += this.cellsize) {
+        this.addToBucket(registered, x, y)
+      }
+    }
+
+    this.entities.push(registered)
+  },
+  addToBucket: function(entity, x, y) {
+    var bucket = this.bucketFor(x,y)
+    if(!bucket) {
+      return
+    }
+    bucket.add(entity)
+    entity.addBucket(bucket)
+  },
+  bucketFor: function(x,y) {
+    x = Math.floor(x / this.cellsize)
+    y = Math.floor(y / this.cellsize)
+    var id = x + '-' + y
+    var bucket = this.buckets[id] 
+    if(!bucket) {
+      bucket = new Bucket(id)
+      this.buckets[id] = bucket
+    }
+    return bucket
+  },
+  performCollisionChecks: function() {
+    var total = 0
+    var entitiesToCheck = []
+    for(var i = 0; i < this.entities.length; i++) {
+      entitiesToCheck.length = 0
+      var registered = this.entities[i]
+      registered.fillArrayWithNearbyEntities(entitiesToCheck)
+      total += entitiesToCheck.length
+      for(var j = 0; j < entitiesToCheck.length; j++) {
+        var other = entitiesToCheck[j]
+        registered.collideWith(other)
+      }
+    }
+  }
+}
+
+module.exports = CollisionGrid
+
 
 });
 
-require.define("/node_modules/primo-rigidbody/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"rigidbody.js"}
-});
-
-require.define("/node_modules/primo-rigidbody/rigidbody.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
+require.define("/node_modules/primo-physics/rigidbody.js",function(require,module,exports,__dirname,__filename,process,global){var _ = require('underscore')
 var util = require('primo-utils')
+
+// NOTE: This is incorrect, rigid bodies shouldn't be handling themselves
+// They should be describing themselves and a core physics system should be 
+// reconciling collisions
 
 var RigidBody = function(entity, options) {
   options = options || {}
   this.entity = entity
-  this.entity.on('collided', _.bind(this.onCollided, this))
+  this.entity.physics = this
+  this.entity.handle('potentialcollision', _.bind(this.onPotentialCollision, this))
   this.entity.handle('collidewith', _.bind(this.collideWith, this))
   this.entity.collideable = true
   this.group = util.valueOrDefault(options.group, 'none')
   this.weight = util.valueOrDefault(options.weight, 10)
+  this.gravity = util.valueOrDefault(options.gravity, 0.0)
+  this.bounce = util.valueOrDefault(options.bounce, 0.5) 
+  this.type = util.valueOrDefault(options.type, RigidBody.TYPES.BOX)
   this.currentIntersection = {}
 }
 
+RigidBody.TYPES =  {
+  BOX: "box",
+  CIRCLE: "circle"
+}
+
 RigidBody.prototype = {
-  onCollided: function(other) {
-    other.dispatch('collidewith', this)
+  touches: function(other) {
+    var otherBody = other.physics
+    var otherType = otherBody ? otherBody.type : RigidBody.TYPES.BOX
+
+    if(this.type === RigidBody.TYPES.BOX && otherType === this.type) 
+      return boxIntersectsWithBox(this.entity, other)
+    else if(this.type === RigidBody.TYPES.CIRCLE && otherType === this.type) 
+      return circleIntersectsWithCircle(this.entity, other)
+    else if(this.type === RigidBody.TYPES.CIRCLE) 
+      return boxIntersectsWithCircle(other, this.entity)
+    else 
+      return boxIntersectsWithCircle(this.entity, other)
+  },
+  onPotentialCollision: function(other) {
+    if(this.touches(other)) {
+      other.dispatch('collidewith', this)
+    }
   },
   collideWith: function(other) {
     var entityOne = this.entity
@@ -3576,6 +3442,13 @@ RigidBody.prototype = {
 
     if(this.group === other.group && this.group !== 'none')
       return
+
+    var intersection = this.calculateIntersectionBetween(entityOne, entityTwo)
+    if(intersection.x === 0 && intersection.y === 0)
+      return
+
+    this.entity.raise('collided', other.entity)
+    other.entity.raise('collided', this.entity)
 
     var entityOnePercentage = 0
     var entityTwoPercentage = 0
@@ -3593,43 +3466,69 @@ RigidBody.prototype = {
       entityTwoPercentage = 0.5
     }
 
-    var intersection = this.calculateIntersectionBetween(entityOne, entityTwo)
+    entityOne.x += intersection.x * (entityOnePercentage + 0.01)
+    entityOne.y += intersection.y * (entityOnePercentage + 0.01)
+    entityTwo.x -= intersection.x * (entityTwoPercentage + 0.01)
+    entityTwo.y -= intersection.y * (entityTwoPercentage + 0.01)
 
-    entityOne.x += intersection.x * (entityOnePercentage * 1.05)
-    entityOne.y += intersection.y * (entityOnePercentage * 1.05)
-    entityTwo.x -= intersection.x * (entityTwoPercentage * 1.05)
-    entityTwo.y -= intersection.y * (entityTwoPercentage * 1.05)
+    if(intersection.x < 0)
+      this.applyHorizontalBounce(this, other, entityOnePercentage, entityTwoPercentage)
+    else if(intersection.x > 0)
+      this.applyHorizontalBounce(other, this, entityTwoPercentage, entityOnePercentage)
 
-    entityOne.velx *= entityTwoPercentage
-    entityOne.vely *= entityTwoPercentage
-    entityTwo.velx *= entityOnePercentage
-    entityTwo.vely *= entityOnePercentage
+    if(intersection.y < 0)
+      this.applyVerticalBounce(this, other, entityOnePercentage, entityTwoPercentage)
+    else if(intersection.y > 0)
+      this.applyVerticalBounce(other, this, entityTwoPercentage, entityOnePercentage)
+
   },
-  calculateIntersectionBetween: function(one, two) {
+  applyHorizontalBounce: function(left, right, leftPercentage, rightPercentage) {
+    var leftEntity = left.entity
+      , rightEntity = right.entity
+
+    var bounce = (leftEntity.velx - rightEntity.velx) 
+    var addition = (leftEntity.velx * rightPercentage + rightEntity.velx * leftPercentage)
+
+    leftEntity.velx = (addition *  (1.0 - left.bounce)) - bounce * left.bounce 
+    rightEntity.velx =  (addition * (1.0 - right.bounce)) + bounce * right.bounce
+  },
+  applyVerticalBounce: function(top, bottom, topPercentage, bottomPercentage) {
+    var topEntity = top.entity,
+        bottomEntity = bottom.entity
+    
+    var bounce = (topEntity.vely - bottomEntity.vely)
+    var addition = (topEntity.vely * bottomPercentage + bottomEntity.vely * topPercentage)
+
+    topEntity.vely = (addition * (1.0 - top.bounce)) - bounce  * top.bounce
+    bottomEntity.vely = (addition * (1.0 - bottom.bounce)) + bounce * bottom.bounce
+  },
+  calculateIntersectionBetween: function(one, two, onec, twoc) {
     var x = 0, y = 0
 
     // Did the right of 'one' brush into the left of 'two'?
-    if(one.lastx + one.width < two.lastx)
+    if(one.lastx + one.width < two.lastx && one.x + one.width > two.x) 
       x = two.x - (one.x + one.width) 
 
     // Did the left of 'one' brush into the right of 'two'?
-    else if(one.lastx > two.lastx + two.width)
+    else if(one.lastx > two.lastx + two.width && one.x < two.x + two.width)
       x = (two.x + two.width) - one.x
 
     // Did the bottom of 'one' brush into the 'top' of 'two'?
-    if(one.lasty + one.height < two.lasty)
+    if(one.lasty + one.height < two.lasty && one.y + one.height > two.y)
       y = two.y - (one.y + one.height) 
 
     // Did the top of 'one' brush into the 'bottom' of 'two'?
-    else if(one.lasty > two.lasty + two.height)
+    else if(one.lasty > two.lasty + two.height && one.y < two.y + two.height)
       y = (two.y + two.height) - one.y
 
     // Woah, noes, mostly likely a spawn failure
+    // Or we've already dealt with this collision
     if(x === 0 && y === 0) {
-      x = two.x - (one.x + one.width) 
-      y = two.y - (one.y + one.height) 
+      if(onec.touches(twoc)) {
+        x = two.x - (one.x + one.width) 
+        y = two.y - (one.y + one.height) 
+      }
     }
-
 
     this.currentIntersection.x = x
     this.currentIntersection.y = y
@@ -3639,13 +3538,34 @@ RigidBody.prototype = {
 
 module.exports = RigidBody
 
+function boxIntersectsWithBox(boxOne, boxTwo) {
+  if(boxOne.x > boxTwo.x + boxTwo.width) return
+  if(boxOne.y > boxTwo.y + boxTwo.height) return
+  if(boxOne.x + boxOne.width < boxTwo.x) return
+  if(boxOne.y + boxOne.height < boxTwo.y) return
+  return true
+}
+
+function boxIntersectsWithCircle(box, circle) {
+  return boxIntersectsWithBox(box, circle) // for now/ lazy
+}
+
+function circleIntersectsWithCircle(circleOne, circleTwo) {
+  var r1 = (circleOne.width > circleOne.height ? circleOne.width : circleOne.height) / 2.0
+  var r2 = (circleTwo.width > circleTwo.height ? circleTwo.width : circleTwo.height) / 2.0
+  var distancex = (circleOne.x + circleOne.width/2) - (circleTwo.x + circleTwo.width/2)
+  var distancey = (circleOne.y + circleOne.height/2) - (circleTwo.y + circleTwo.height/2)
+  var distanceSq = (distancex*distancex) + (distancey*distancey)
+  return distanceSq < (r1+r2) * (r1+r2)
+}
+
 
 });
 
-require.define("/node_modules/primo-rigidbody/node_modules/primo-utils/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"commons.js"}
+require.define("/node_modules/primo-physics/node_modules/primo-utils/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"commons.js"}
 });
 
-require.define("/node_modules/primo-rigidbody/node_modules/primo-utils/commons.js",function(require,module,exports,__dirname,__filename,process,global){module.exports = {
+require.define("/node_modules/primo-physics/node_modules/primo-utils/commons.js",function(require,module,exports,__dirname,__filename,process,global){module.exports = {
   valueOrDefault: function(value, def) {
     return typeof value !== 'undefined' ? 
          value : 
@@ -3657,7 +3577,7 @@ require.define("/node_modules/primo-rigidbody/node_modules/primo-utils/commons.j
 
 require.define("/site/entities/rock.js",function(require,module,exports,__dirname,__filename,process,global){var Primo = require('primo')
 var Animation = require('primo-animation')
-var RigidBody = require('primo-rigidbody')
+var RigidBody = require('primo-physics').RigidBody
 
 var Shrinker = require('../components/shrinker')
 
@@ -3667,7 +3587,7 @@ module.exports = Primo.DefineEntity(function() {
   this.rockType = 0
   this.attach(new RigidBody(this, { weight: Infinity, group: 'rock' }))
   this.attach(new Shrinker(this, [12, 8, 4]))
-  this.attach(new Animation(this, 'media/rock.png', 12, 12))
+  this.attach(new Animation(this, 'media/rock.png', 3, 1))
     .define( 'idle', 10, [0])
   this.on('killed', function() { 
     this.raise('rock-destroyed', this)
@@ -3709,7 +3629,7 @@ require.define("/site/entities/centipedehead.js",function(require,module,exports
 
 var Primo = require('primo')
 var Animation = require('primo-animation')
-var RigidBody = require('primo-rigidbody')
+var RigidBody = require('primo-physics').RigidBody
 var BoundsCorrection = require('primo-boundary')
 
 var CentipedeSegment = require('./centipedesegment')
@@ -3719,7 +3639,7 @@ module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 8
   this.height = 8
   this.attach(new RigidBody(this, { group: 'centipede'  }))
-  this.attach(new Animation(this, 'media/centipede.png', 8, 8))
+  this.attach(new Animation(this, 'media/centipede.png', 5, 5))
     .define( 'walkleft', 0.1, [0, 1], { flipx: true})
     .define( 'walkright', 0.1, [0, 1])
     .define( 'walkdown', 0.1, [2, 3])
@@ -3884,7 +3804,7 @@ require.define("/site/entities/centipedesegment.js",function(require,module,expo
 
 var Primo = require('primo')
 var Animation = require('primo-animation')
-var RigidBody = require('primo-rigidbody')
+var RigidBody = require('primo-physics').RigidBody
 
 var DeadSegment = require('./deadsegment')
 var Rock = require('./rock')
@@ -3928,7 +3848,7 @@ module.exports =  Primo.DefineEntity(function(id, data) {
   this.height = 8
   this.attach(new Trailer(this, data.head, data.index))
   this.attach(new RigidBody(this, { group: 'centipede'  }))
-  this.attach(new Animation(this, 'media/centipede.png', 8, 8, 0.1, [12,13]))
+  this.attach(new Animation(this, 'media/centipede.png', 5, 5))
     .define( 'walkleft', 0.1, [12,13])
     .define( 'walkright', 0.1, [12,13])
     .define( 'walkdown', 0.1, [10,11])
@@ -3946,7 +3866,7 @@ module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 8
   this.height = 8
   this.attach(new TimedRemoval(this, 1))
-  this.attach(new Animation(this, 'media/centipede.png', 8,8))
+  this.attach(new Animation(this, 'media/centipede.png', 5,5))
     .define('idle', 0.2, [10, 15, 16, 17, 18, 19])
 })
 
@@ -4063,7 +3983,7 @@ module.exports = Primo.DefineEntity(function(id, data) {
   this.width = 8
   this.height = 8
   this.attach(new DefenceUnit(this, data.head))
-  this.attach(new Animation(this, 'media/defenceunit.png', 8, 8))
+  this.attach(new Animation(this, 'media/defenceunit.png'))
     .define('idle', 10, [0])
 })
 
@@ -4072,7 +3992,7 @@ module.exports = Primo.DefineEntity(function(id, data) {
 
 require.define("/site/entities/bullet.js",function(require,module,exports,__dirname,__filename,process,global){var Primo = require('primo')
 var Animation = require('primo-animation')
-var util = require('primo/lib/commons')
+var util = require('primo-utils')
 
 var Bullet = require('../components/bullet')
 
@@ -4080,11 +4000,24 @@ module.exports = Primo.DefineEntity(function(id, data){
   this.width = 4
   this.height = 4
   this.attach(new Bullet(this))
-  this.attach(new Animation(this, 'media/bullet.png', 4, 4))
+  this.attach(new Animation(this, 'media/bullet.png', 5, 1))
     .define('idle', 0.1, [0, 1, 2])
   this.velx = util.valueOrDefault(data.spread, 0)
   this.vely = -data.speed
 })
+
+});
+
+require.define("/node_modules/primo-utils/package.json",function(require,module,exports,__dirname,__filename,process,global){module.exports = {"main":"commons.js"}
+});
+
+require.define("/node_modules/primo-utils/commons.js",function(require,module,exports,__dirname,__filename,process,global){module.exports = {
+  valueOrDefault: function(value, def) {
+    return typeof value !== 'undefined' ? 
+         value : 
+         def
+  }
+}
 
 });
 
