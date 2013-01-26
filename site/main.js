@@ -1,5 +1,6 @@
 var Primo = require('primo')
 var CentipedeGame = require('./centipedegame')
+var physics = require('primo-physics')
 
 
 var $start = $('#start')
@@ -50,6 +51,7 @@ var $start = $('#start')
     game = new CentipedeGame(runner)
     runner.on('init', function() {
       game.start()
+      physics.init(runner)
     })
     runner.start()
     $start.hide()
